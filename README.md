@@ -33,6 +33,7 @@ cierra sola en la próxima revisión.
 | Alertas | Listado con filtros por obra, DT, módulo y nivel |
 | Informes | Semanal por obra y consolidado de gerencia |
 | Cargar | Certificados, láminas, requerimientos, controles de calidad, actas, etapa, legajo de HyS y pedidos |
+| Coordinación | Evaluación mensual de los DT (30 controles en 8 bloques, conformidad ponderada), desvíos y compras. Usa los datos reales de la app de coordinación: se importan desde el JSON y quedan solo en el navegador |
 
 ## Reglas de alerta
 
@@ -82,6 +83,7 @@ Sin frameworks ni compilación: HTML, CSS y JavaScript que el navegador lee tal 
 | `panel/assets/app.js` | Vistas y navegación |
 | `panel/assets/formularios.js` | Formularios de carga de oficina |
 | `panel/assets/graficos.js` | Gantt y curva S |
+| `panel/assets/coordinacion.js` | Sección Coordinación: importa el JSON de la app de coordinación y calcula conformidad, desvíos y compras |
 | `scripts/armar_demo_panel.py` | Junta todo en un solo HTML para compartir la demo como una página |
 
 ## Próximos pasos

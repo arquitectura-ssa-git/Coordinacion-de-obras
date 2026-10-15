@@ -1,11 +1,13 @@
 // Panel de seguimiento de obras: router y vistas.
 // Rutas por hash (solo letras, números, punto y guion, para que funcionen como enlace directo):
 //   #tablero · #alertas · #dts · #dt.<id> · #obra.<id>[.<pestaña>] · #informes[.<obra>] · #cargar[.<tipo>]
+//   #coord[.<pestaña>[.<obra>]] (evaluación de DT, desvíos y compras: assets/coordinacion.js)
 (() => {
   const P = window.Panel;
   const R = window.Reglas;
   const G = window.Graficos;
   const F = window.Formularios;
+  const C = window.Coord;
   const esc = P.esc;
   const vista = document.getElementById('vista');
 
@@ -449,6 +451,7 @@
     else if (r.vista === 'dt') html = dt(r.a);
     else if (r.vista === 'informes') html = informes(r.a);
     else if (r.vista === 'cargar') html = F.vista(E, r.a);
+    else if (r.vista === 'coord') html = C.vista(r.a, r.b);
     else html = tablero();
     vista.innerHTML = html;
     const activa = { obra: 'tablero', dt: 'dts' }[r.vista] || r.vista;
@@ -458,6 +461,8 @@
     badge.textContent = crit;
     badge.hidden = !crit;
     if (r.vista === 'cargar') F.montar(E, refrescar);
+    if (r.vista === 'coord') C.montar(render);
+    if (P.DEMO) document.getElementById('aviso-demo').hidden = r.vista === 'coord';
   }
 
   async function refrescar() {

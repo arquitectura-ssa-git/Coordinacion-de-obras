@@ -240,6 +240,22 @@ a.sem:hover, button.sem:hover { filter: brightness(.95); outline: 1px solid curr
 .ok-msg { color: var(--ok); background: var(--ok-soft); border-radius: 10px; padding: 8px 12px; font-size: 14px; }
 .err-msg { color: var(--bad); background: var(--bad-soft); border-radius: 10px; padding: 8px 12px; font-size: 14px; }
 
+/* ---------- coordinación ---------- */
+.mini-barra .real.verde { background: var(--ok); }
+.mini-barra .real.amarillo { background: var(--warn); }
+.mini-barra .real.rojo { background: var(--bad); }
+.dato .sem { display: inline-flex; font-size: 12px; }
+.tabla.controles td, .tabla.controles th { padding: 5px 8px; }
+.tabla.controles .ck { text-align: center; white-space: nowrap; }
+.tabla.controles tr.bloque td { background: var(--surface-2); padding: 7px 8px; }
+.celda {
+  width: 32px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface);
+  cursor: pointer; font-weight: 700; color: var(--muted);
+}
+.celda.si { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+.celda.no { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+.celda:disabled { cursor: default; opacity: .4; background: transparent; }
+
 /* ---------- DT ---------- */
 .personas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; }
 .persona { display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: var(--text); }
