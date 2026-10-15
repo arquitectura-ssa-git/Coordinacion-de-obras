@@ -1,0 +1,2949 @@
+{
+ "formato": "coordinacion-obras-export",
+ "version": 1,
+ "exportado": "2026-10-15",
+ "instrucciones_para_claude": [
+  "Este archivo contiene todo el contexto y los datos de un proyecto de control de obras. Léelo completo antes de responder.",
+  "El usuario (Adolfo) escribe en español. Respóndele en español.",
+  "'proyecto', 'reglas_y_decisiones' y 'pendientes' explican qué se hizo y qué falta. 'datos' son los datos cargados. 'app.html' es el código completo de la aplicación.",
+  "Para recrear la app: publicar 'app.html' como artifact con capabilities {db:{}, downloads:true}. La app guarda todo en un único documento de base de datos, colección 'app', documento 'state', con los campos {json: <texto JSON de 'datos'>, at: <milisegundos>}.",
+  "Alternativa sin base de datos: dentro de la app, pestaña 'Obras y DT' → 'Restaurar desde archivo', con un archivo que contenga solo el objeto 'datos' (el archivo coordinacion-obras-datos.json hace eso).",
+  "No inventes datos de compras ni de otros meses: lo que no está en 'datos' no fue cargado."
+ ],
+ "proyecto": {
+  "usuario": "Adolfo Villoldo Fernández, arquitecto, coordinador de obras",
+  "contexto": "Coordina 6 obras vigentes con 5 DT (directores técnicos). Quiere reducir el tiempo de control: carga fluida y dashboards completos para analizar sin hacer tanta carga de datos a mano.",
+  "objetivo_programa": "Programa simple para visualizar y cargar la información de las obras, evaluar el desempeño de los DT y controlar y monitorear los desvíos.",
+  "obras": [
+   {
+    "codigo": "MZ",
+    "nombre": "Martínez Zuccardi",
+    "dts": [
+     "Federico Marti"
+    ],
+    "activa": true
+   },
+   {
+    "codigo": "EF",
+    "nombre": "Eglof (EF LP16)",
+    "dts": [
+     "Federico Periotti"
+    ],
+    "activa": true
+   },
+   {
+    "codigo": "TPL",
+    "nombre": "Acceso Terminal Panamericana Logística",
+    "dts": [
+     "Sergio Villalba"
+    ],
+    "activa": true
+   },
+   {
+    "codigo": "PRC",
+    "nombre": "Poviña · San Pablo Country",
+    "dts": [
+     "Florencia Ruiz"
+    ],
+    "activa": true
+   },
+   {
+    "codigo": "CE",
+    "nombre": "Carletto",
+    "dts": [
+     "Federico Periotti",
+     "Nahuel Bejarano"
+    ],
+    "activa": true
+   },
+   {
+    "codigo": "SYB",
+    "nombre": "Shopping YB",
+    "dts": [
+     "Florencia Ruiz"
+    ],
+    "activa": true
+   },
+   {
+    "codigo": "RM-T",
+    "nombre": "RM-T (obra finalizada)",
+    "dts": [],
+    "activa": false
+   }
+  ],
+  "evaluacion": "Cada obra tiene 30 controles agrupados en 8 bloques con frecuencia semanal, quincenal, mensual, diaria o eventual. Cada semana se marca cumple (1) o no cumple (0). La conformidad es el promedio ponderado por bloque. Pesos: planificación 15%, coordinación 15%, documentación 15%, materiales 15%, calidad 15%, HyS 5%, administración 10%, reporting 10%. Meta de conformidad 80% y piso de alerta 60% (propuesta de Claude, ajustable)."
+ },
+ "reglas_y_decisiones": [
+  "Indicadores de gestión por obra y mes: desvíos anticipados por DT (totales vs DT), pendientes cerrados, retrabajos (con responsable), paralizaciones evitables.",
+  "Desvíos anticipados y pendientes cerrados: conforme si ascienden contra el mes anterior, no conforme si descienden.",
+  "Retrabajos y paralizaciones evitables: conforme si descienden, no conforme si ascienden (en cero cuenta como conforme).",
+  "En el registro de desvíos cada desvío tiene dos botones: 'Genera retrabajo' y 'Paralización evitable' (sin definir / Sí / No). Cuando hay alguno marcado en el mes, los indicadores de retrabajos y paralizaciones se calculan solos desde el registro y el campo manual queda bloqueado. El responsable del retrabajo sale del campo Responsable del desvío.",
+  "Tablero: columna de observación por cada DT y un renglón de observaciones generales para todos los DT, guardados por mes.",
+  "Informe del mes: las observaciones de cada control semanal se ubican solas en 'Referido a la DT' o 'Referido a la obra/proyecto' según el selector DT/Obra de la fila; además se pueden cargar observaciones adicionales por bloque.",
+  "Carletto (CE) lo dirigen dos DT (Periotti y Bejarano): su resultado cuenta para ambos.",
+  "Compras: indicadores del informe de marzo 2026: tiempo de ciclo (inicio a llegada), exactitud del pedido (entregados / pedidos, meta 95%) y ahorro (presupuesto inicial vs compra final). Los requerimientos en curso no cuentan en el promedio. El número de requerimiento es consecutivo por obra, así que se identifica por obra + número.",
+  "Los datos de septiembre 2026 se tomaron de las planillas de cada obra (MZ, EF LP16, TPL, PRC, CE, SHOPYB). Dos desvíos que estaban copiados de EF LP16 dentro de las planillas de MZ y SHOPYB no se cargaron. Los datos de agosto de MZ, PRC y SYB solo existen como indicadores (columna 'Anterior')."
+ ],
+ "pendientes": [
+  "Completar Compras con los tableros de Trello de cada obra. La conexión de Trello del usuario solo ve su espacio 'Coordinación de PE & Obras' y no puede leer los 6 tableros por obra (error de acceso). Opciones: unirse a los tableros / reautorizar espacios en el conector, o exportar cada tablero a JSON (Menú → Imprimir y exportar → Exportar como JSON) y subirlos.",
+  "Cargar indicadores de pendientes, retrabajos y paralizaciones de EF y CE de septiembre, y el texto del informe mensual de EF y CE.",
+  "TPL tiene 1 retrabajo de septiembre sin responsable.",
+  "Un desvío de PRC dice 'Lluvias y anegamientoLluvias y anegamiento' (texto duplicado).",
+  "Posible próximo paso: informe mensual por DT listo para imprimir o enviar."
+ ],
+ "trello": {
+  "nota": "Un tablero por obra, compartido con el usuario. Estado: aún no leídos.",
+  "tableros": {
+   "MZ": "https://trello.com/b/k5W4pARL/obra-mz-marcos-paz-36",
+   "SYB": "https://trello.com/b/Ubol6YmU/obra-shopping-yb",
+   "TPL": "https://trello.com/b/30vZhOnT/obra-tpl-acceso",
+   "PRC": "https://trello.com/b/9hOHZXpa/obra-prc-povina-country-san-pablo-macrolote-11-lote-09",
+   "CE": "https://trello.com/b/uMyF3zBU/obra-ce-praderas-lote-137",
+   "EF": "https://trello.com/b/3H24kuxM/obra-fe-lp16"
+  }
+ },
+ "catalogo_controles": [
+  {
+   "n": 1,
+   "bloque": "PLANIFICACION",
+   "control": "Cumplimiento de Hitos Mensuales",
+   "instrumentacion": "CALENDARIO",
+   "frecuencia": "QUINCENAL"
+  },
+  {
+   "n": 2,
+   "bloque": "PLANIFICACION",
+   "control": "Gantt actualizado",
+   "instrumentacion": "GANTT",
+   "frecuencia": "MENSUAL"
+  },
+  {
+   "n": 3,
+   "bloque": "PLANIFICACION",
+   "control": "Planificación y seguimiento semanal (Minuta semanal)",
+   "instrumentacion": "ITEMIZADO",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 4,
+   "bloque": "PLANIFICACION",
+   "control": "Detección temprana de desvíos",
+   "instrumentacion": "DISCORD / ITEMIZADO",
+   "frecuencia": "EVENTUAL"
+  },
+  {
+   "n": 5,
+   "bloque": "PLANIFICACION",
+   "control": "Plan de acción ante desvíos",
+   "instrumentacion": "DISCORD",
+   "frecuencia": "EVENTUAL"
+  },
+  {
+   "n": 6,
+   "bloque": "COORDINACION",
+   "control": "Coordinación de gremios y contratistas",
+   "instrumentacion": "DISCORD",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 7,
+   "bloque": "COORDINACION",
+   "control": "Coordinación de tareas entre rubros",
+   "instrumentacion": "ITEMIZADO",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 8,
+   "bloque": "COORDINACION",
+   "control": "Seguimiento de pendientes",
+   "instrumentacion": "ITEMIZADO",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 9,
+   "bloque": "COORDINACION",
+   "control": "Resolución / seguimiento de interferencias",
+   "instrumentacion": "DISCORD",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 10,
+   "bloque": "DOCUMENTACION",
+   "control": "Gestión doc. Tec. disponible y actualizada APTO OBRA",
+   "instrumentacion": "PLANILLA",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 11,
+   "bloque": "DOCUMENTACION",
+   "control": "Actualización de documentación de obra",
+   "instrumentacion": "PLANO / REGISTRO",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 12,
+   "bloque": "DOCUMENTACION",
+   "control": "Gestión permisos municipales y administrativos de obra",
+   "instrumentacion": "CHECK LIST",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 13,
+   "bloque": "DOCUMENTACION",
+   "control": "Gestión de Documentación técnica",
+   "instrumentacion": "PLANO / REGISTRO",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 14,
+   "bloque": "DOCUMENTACION",
+   "control": "Libro de Ordenes de servicio / Nota de Pedido",
+   "instrumentacion": "LIBRO",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 15,
+   "bloque": "MATERIALES",
+   "control": "Gestión y cierre de Requerimientos de compras",
+   "instrumentacion": "TRELLO",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 16,
+   "bloque": "MATERIALES",
+   "control": "Previsión y pedido de materiales",
+   "instrumentacion": "TRELLO",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 17,
+   "bloque": "MATERIALES",
+   "control": "Recepción, Stock y Faltantes de materiales",
+   "instrumentacion": "PLANILLA",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 18,
+   "bloque": "MATERIALES",
+   "control": "Control de calidad de materiales (check list, ensayos, etc, s/ corresponda)",
+   "instrumentacion": "CHECK LIST",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 19,
+   "bloque": "MATERIALES",
+   "control": "Verificación cómputos de materiales de contratistas",
+   "instrumentacion": "PLANILLA",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 20,
+   "bloque": "CALIDAD",
+   "control": "Control de calidad de EJECUCION DE TRABAJOS",
+   "instrumentacion": "CHECK LIST",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 21,
+   "bloque": "CALIDAD",
+   "control": "Detección / prevención de retrabajos",
+   "instrumentacion": "CHECK LIST",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 22,
+   "bloque": "CALIDAD",
+   "control": "Recepción de trabajos ejecutados",
+   "instrumentacion": "ACTA / CHECK LIST",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 23,
+   "bloque": "HyS. Y OBRA",
+   "control": "Layout de obra (Acceso, Descargas, Camineras, Acopio, Bº, etc.)",
+   "instrumentacion": "CROQUIS",
+   "frecuencia": "MENSUAL"
+  },
+  {
+   "n": 24,
+   "bloque": "HyS. Y OBRA",
+   "control": "Control (EPP, Ord. y Limp., Trab. Altura, Riesgo Elect., Registro desvíos)",
+   "instrumentacion": "CHECK LIST/ DISCORD",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 25,
+   "bloque": "ADMINISTRACION",
+   "control": "Medición de Certificados quincenales Contratista",
+   "instrumentacion": "PLANILLA",
+   "frecuencia": "QUINCENAL"
+  },
+  {
+   "n": 26,
+   "bloque": "ADMINISTRACION",
+   "control": "Gestión de cambios y adicionales",
+   "instrumentacion": "PLANILLA",
+   "frecuencia": "EVENTUAL"
+  },
+  {
+   "n": 27,
+   "bloque": "ADMINISTRACION",
+   "control": "Medición de certificados Mensuales p/ cliente",
+   "instrumentacion": "PLANILLA",
+   "frecuencia": "MENSUAL"
+  },
+  {
+   "n": 28,
+   "bloque": "REPORTING",
+   "control": "Informes diarios internos",
+   "instrumentacion": "DISCORD",
+   "frecuencia": "DIARIO"
+  },
+  {
+   "n": 29,
+   "bloque": "REPORTING",
+   "control": "Informes SEMANAL p/ Cliente",
+   "instrumentacion": "INFORME PDF",
+   "frecuencia": "SEMANAL"
+  },
+  {
+   "n": 30,
+   "bloque": "REPORTING",
+   "control": "Informe fotográfico y de avance MENSUAL P/ Cliente",
+   "instrumentacion": "INFORME PDF",
+   "frecuencia": "MENSUAL"
+  }
+ ],
+ "formato_datos": {
+  "checks": "clave 'OBRA|AAAA-MM' → {i:{nroControl:[sem1..semN] con 1/0/null}, o:{nroControl:'observación'}, d:{nroControl:'dt'|'obra'}}. Las semanas son los lunes del mes.",
+  "inf": "clave 'OBRA|AAAA-MM' → {txt:{BLOQUE:{dt,obra}}, ind:{desvios|pendientes|retrabajos|paralizaciones:{dt,total,resp,obs}}}",
+  "desvios": "lista de {id,fecha,obra,evento,tipo,detecta,impDias,plan,fechaPA,resp,estado,prio,retrab,paral}",
+  "compras": "lista de {id,obra,req,desc,inicio,fin,pedidos,entregados,pIni,pCompra,obs}",
+  "obsDT": "{AAAA-MM:{idDT:'texto', _gral:'texto'}}"
+ },
+ "archivos_originales_no_incluidos": [
+  "EVALUA PRO. COMPRA MARZO26.xlsx",
+  "INDICADORES DE COMP.MARZO-REV02.pdf",
+  "TPL-SV-09-2026-09.xlsx",
+  "CE-NB-FP-2026-09.xlsx",
+  "MZ- FM- 2026-09.xlsx",
+  "EFLP16- FP- 2026-09.xlsx",
+  "PRC-SPC-FR-2026-09.xlsx",
+  "SHOPYB-FR-2026-09.xlsx",
+  "PROCESO GENERAL DE EJECUCION DE OBRA-R1.pdf",
+  "PROCESO APTO OBRA 2026-REV01.pptx",
+  "PROCESO CERTIFICACION.pptx",
+  "Estos archivos son binarios y no se incluyen. Sus datos relevantes ya están en 'datos'. Si hace falta el proceso de obra o de certificación, hay que volver a subirlos."
+ ],
+ "datos": {
+  "v": 1,
+  "cfg": {
+   "meta": 0.7,
+   "alerta": 0.55,
+   "w": {
+    "PLANIFICACION": 0.15,
+    "COORDINACION": 0.15,
+    "DOCUMENTACION": 0.15,
+    "MATERIALES": 0.15,
+    "CALIDAD": 0.15,
+    "HyS. Y OBRA": 0.05,
+    "ADMINISTRACION": 0.1,
+    "REPORTING": 0.1
+   }
+  },
+  "dts": [
+   {
+    "id": "fm",
+    "nombre": "Federico Marti"
+   },
+   {
+    "id": "fp",
+    "nombre": "Federico Periotti"
+   },
+   {
+    "id": "sv",
+    "nombre": "Sergio Villalba"
+   },
+   {
+    "id": "fr",
+    "nombre": "Florencia Ruiz"
+   },
+   {
+    "id": "nb",
+    "nombre": "Nahuel Bejarano"
+   }
+  ],
+  "obras": [
+   {
+    "id": "MZ",
+    "nombre": "Martínez Zuccardi",
+    "dts": [
+     "fm"
+    ],
+    "activa": true
+   },
+   {
+    "id": "EF",
+    "nombre": "Eglof (EF LP16)",
+    "dts": [
+     "fp"
+    ],
+    "activa": true
+   },
+   {
+    "id": "TPL",
+    "nombre": "Acceso Terminal Panamericana Logística",
+    "dts": [
+     "sv"
+    ],
+    "activa": true
+   },
+   {
+    "id": "PRC",
+    "nombre": "Poviña · San Pablo Country",
+    "dts": [
+     "fr"
+    ],
+    "activa": true
+   },
+   {
+    "id": "CE",
+    "nombre": "Carletto",
+    "dts": [
+     "fp",
+     "nb"
+    ],
+    "activa": true
+   },
+   {
+    "id": "SYB",
+    "nombre": "Shopping YB",
+    "dts": [
+     "fr"
+    ],
+    "activa": true
+   },
+   {
+    "id": "RM-T",
+    "nombre": "RM-T (obra finalizada)",
+    "dts": [],
+    "activa": false
+   }
+  ],
+  "checks": {
+   "MZ|2026-10": {
+    "i": {
+     "1": [
+      1
+     ],
+     "2": [
+      1
+     ],
+     "3": [
+      1
+     ],
+     "4": [
+      1
+     ],
+     "5": [
+      1
+     ],
+     "6": [
+      1
+     ],
+     "7": [
+      1
+     ],
+     "8": [
+      1
+     ],
+     "9": [
+      1
+     ],
+     "10": [
+      1
+     ],
+     "11": [
+      1
+     ],
+     "12": [
+      1
+     ],
+     "13": [
+      1
+     ],
+     "14": [
+      1
+     ],
+     "15": [
+      1
+     ],
+     "16": [
+      1
+     ],
+     "17": [
+      1
+     ],
+     "18": [
+      1
+     ],
+     "19": [
+      1
+     ],
+     "20": [
+      null
+     ],
+     "21": [
+      null
+     ],
+     "22": [
+      null
+     ],
+     "23": [
+      0
+     ],
+     "24": [
+      0
+     ],
+     "25": [
+      1
+     ],
+     "26": [
+      1
+     ],
+     "27": [
+      1
+     ],
+     "28": [
+      1
+     ],
+     "29": [
+      0
+     ],
+     "30": [
+      1
+     ]
+    },
+    "o": {
+     "2": "Se le presento al cliente tiene un desvio de 3 meses"
+    },
+    "d": {
+     "2": "obra",
+     "3": "dt"
+    }
+   },
+   "MZ|2026-09": {
+    "i": {
+     "1": [
+      1,
+      null,
+      0
+     ],
+     "2": [
+      1
+     ],
+     "3": [
+      1,
+      0,
+      0,
+      1
+     ],
+     "4": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "5": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "6": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "7": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "8": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "9": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "10": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "11": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "12": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "13": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "14": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "15": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "16": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "17": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "18": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "19": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "20": [
+      1,
+      1,
+      0,
+      0
+     ],
+     "21": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "22": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "23": [
+      1
+     ],
+     "24": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "25": [
+      1,
+      null,
+      1
+     ],
+     "26": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "27": [
+      1
+     ],
+     "28": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "29": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "30": [
+      1
+     ]
+    },
+    "o": {
+     "1": ".",
+     "3": "Planificó en cuaderno",
+     "8": "anota en cuaderno",
+     "9": "anota en cuaderno",
+     "13": ".",
+     "14": "No esta registrando los cambios en libro",
+     "20": "Hay controles pero no comunica debidamente",
+     "22": "necesita asentar registros",
+     "24": "DOble P cuenta con HYS permanente",
+     "29": "No esta ejecutando el informe semanal"
+    },
+    "d": {
+     "1": "dt"
+    }
+   },
+   "EF|2026-09": {
+    "i": {
+     "1": [
+      1,
+      null,
+      0
+     ],
+     "2": [
+      1
+     ],
+     "3": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "4": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "5": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "6": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "7": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "8": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "9": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "10": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "11": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "12": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "13": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "14": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "15": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "16": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "17": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "18": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "19": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "20": [
+      1,
+      1,
+      0,
+      0
+     ],
+     "21": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "22": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "23": [
+      1
+     ],
+     "24": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "25": [
+      1,
+      null,
+      1
+     ],
+     "26": [
+      1,
+      1,
+      1,
+      0
+     ],
+     "27": [
+      1
+     ],
+     "28": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "29": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "30": [
+      1
+     ]
+    },
+    "o": {
+     "1": "Construbanda no entrego materiales",
+     "8": "No hay itemizado de seguimiento",
+     "9": "falla en la coordinacion con proveedor de materiales",
+     "20": "Controla pero no registra check list",
+     "22": "no se registraron recepciones prov",
+     "24": "La obra sigue sin EPP",
+     "26": "Hay que recomputar movimiento de suelos"
+    },
+    "d": {
+     "1": "obra",
+     "26": "obra"
+    }
+   },
+   "TPL|2026-09": {
+    "i": {
+     "1": [
+      1,
+      null,
+      1
+     ],
+     "2": [
+      1
+     ],
+     "3": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "4": [
+      1,
+      0,
+      1,
+      0
+     ],
+     "5": [
+      1,
+      0,
+      1,
+      0
+     ],
+     "6": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "7": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "8": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "9": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "10": [
+      1,
+      1,
+      1,
+      0
+     ],
+     "11": [
+      1,
+      1,
+      0,
+      0
+     ],
+     "12": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "13": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "14": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "15": [
+      1,
+      0,
+      0,
+      1
+     ],
+     "16": [
+      1,
+      0,
+      0,
+      1
+     ],
+     "17": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "18": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "19": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "20": [
+      1,
+      0,
+      1,
+      0
+     ],
+     "21": [
+      1,
+      0,
+      1,
+      0
+     ],
+     "22": [
+      1,
+      0,
+      1,
+      0
+     ],
+     "23": [
+      1
+     ],
+     "24": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "25": [
+      1,
+      null,
+      1
+     ],
+     "26": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "27": [
+      1
+     ],
+     "28": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "29": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "30": [
+      0
+     ]
+    },
+    "o": {
+     "4": "No se previo la lluvia (obra anegada x 2 días)",
+     "5": "No se previo la lluvia (obra anegada x 2 días)",
+     "11": "Sin planos impresos en Of. De Obra",
+     "14": "No consiguio el libro aun",
+     "15": "al principio no usaba trello, despues si",
+     "16": "al principio no usaba trello, despues si",
+     "20": "Realiz los controles sin check list",
+     "21": "no se llenaron las bases y las inundo la lluvia",
+     "22": "no se llenaron las bases y las inundo la lluvia",
+     "24": "realiza los controles pero no los registra"
+    },
+    "d": {}
+   },
+   "CE|2026-09": {
+    "i": {
+     "1": [
+      1,
+      null,
+      1
+     ],
+     "2": [
+      1
+     ],
+     "3": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "4": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "5": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "6": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "7": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "8": [
+      1,
+      0,
+      1,
+      0
+     ],
+     "9": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "10": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "11": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "12": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "13": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "14": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "15": [
+      1,
+      1,
+      0,
+      1
+     ],
+     "16": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "17": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "18": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "19": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "20": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "21": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "22": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "23": [
+      1
+     ],
+     "24": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "25": [
+      1,
+      null,
+      1
+     ],
+     "26": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "27": [
+      1
+     ],
+     "28": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "29": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "30": [
+      1
+     ]
+    },
+    "o": {
+     "2": "Presento Gant hasta enero 2027",
+     "4": "Eran Reactivos, se estan anticipando las ultimas semanas",
+     "5": "esperan soluciones sin propuestas de mejoras",
+     "10": "falta aprobacion de estar y cocina",
+     "11": "Sin plano en obra . Falta aprobacion de estar y cocina",
+     "20": "membrana mal pegada en losa",
+     "21": "membrana mal pegada en losa",
+     "26": "Lo estaba manejando Gerencia.",
+     "29": "Corregir informe semana 38"
+    },
+    "d": {
+     "10": "obra",
+     "11": "obra"
+    }
+   },
+   "PRC|2026-09": {
+    "i": {
+     "1": [
+      1,
+      null,
+      0
+     ],
+     "2": [
+      1
+     ],
+     "3": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "4": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "5": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "6": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "7": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "8": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "9": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "10": [
+      1,
+      1,
+      0,
+      0
+     ],
+     "11": [
+      1,
+      1,
+      0,
+      0
+     ],
+     "12": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "13": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "14": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "15": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "16": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "17": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "18": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "19": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "20": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "21": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "22": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "23": [
+      1
+     ],
+     "24": [
+      1,
+      1,
+      0,
+      0
+     ],
+     "25": [
+      1,
+      null,
+      1
+     ],
+     "26": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "27": [
+      1
+     ],
+     "28": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "29": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "30": [
+      1
+     ]
+    },
+    "o": {
+     "3": "Planifica pero no usa la minuta",
+     "4": "Se vio tema contratal HºE pluma.",
+     "6": "Falta Ejecutivo Estructura",
+     "7": "Oficina de obra sin planos",
+     "14": "No se controlo listado enviado por la contratista",
+     "19": "No se controlo listado enviado por la contratista",
+     "24": "Realiza el control sin asentar en libro."
+    },
+    "d": {
+     "6": "obra"
+    }
+   },
+   "SYB|2026-09": {
+    "i": {
+     "1": [
+      1,
+      null,
+      0
+     ],
+     "2": [
+      1
+     ],
+     "3": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "4": [
+      1,
+      1,
+      0,
+      1
+     ],
+     "5": [
+      1,
+      1,
+      0,
+      1
+     ],
+     "6": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "7": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "8": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "9": [
+      1,
+      1,
+      0,
+      1
+     ],
+     "10": [
+      1,
+      1,
+      0,
+      1
+     ],
+     "11": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "12": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "13": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "14": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "15": [
+      1,
+      1,
+      0,
+      1
+     ],
+     "16": [
+      1,
+      1,
+      0,
+      1
+     ],
+     "17": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "18": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "19": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "20": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "21": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "22": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "23": [
+      1
+     ],
+     "24": [
+      1,
+      0,
+      1,
+      1
+     ],
+     "25": [
+      1,
+      null,
+      1
+     ],
+     "26": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "27": [
+      1
+     ],
+     "28": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "29": [
+      1,
+      1,
+      1,
+      1
+     ],
+     "30": [
+      1
+     ]
+    },
+    "o": {
+     "3": "No usa minuta pero hay Planificacion activa",
+     "10": "No estan actualizando",
+     "14": "Usa cuaderno y lo hace firmar al contratista",
+     "20": "Usa Check list."
+    },
+    "d": {}
+   },
+   "EF|2026-10": {
+    "i": {
+     "1": [
+      null
+     ],
+     "2": [
+      null
+     ],
+     "3": [
+      1
+     ],
+     "4": [
+      null
+     ],
+     "5": [
+      null,
+      null
+     ],
+     "23": [
+      null
+     ],
+     "24": [
+      1
+     ],
+     "28": [
+      1
+     ],
+     "29": [
+      1
+     ]
+    },
+    "o": {},
+    "d": {}
+   },
+   "SYB|2026-10": {
+    "i": {
+     "1": [
+      0
+     ],
+     "2": [
+      0
+     ],
+     "3": [
+      1
+     ],
+     "4": [
+      1
+     ],
+     "5": [
+      1
+     ],
+     "6": [
+      0
+     ],
+     "7": [
+      1
+     ],
+     "8": [
+      1
+     ],
+     "9": [
+      1
+     ],
+     "10": [
+      0
+     ],
+     "11": [
+      0
+     ],
+     "12": [
+      1
+     ],
+     "13": [
+      1
+     ],
+     "14": [
+      1
+     ],
+     "15": [
+      1
+     ],
+     "16": [
+      1
+     ],
+     "17": [
+      1
+     ],
+     "18": [
+      1
+     ],
+     "19": [
+      1
+     ],
+     "20": [
+      1
+     ],
+     "21": [
+      1
+     ],
+     "22": [
+      1
+     ],
+     "23": [
+      1
+     ],
+     "24": [
+      0
+     ],
+     "25": [
+      1
+     ],
+     "26": [
+      1
+     ],
+     "27": [
+      1
+     ],
+     "28": [
+      1
+     ],
+     "29": [
+      1
+     ],
+     "30": [
+      1
+     ]
+    },
+    "o": {
+     "1": "Pilotera rota",
+     "6": "Fallas coordinación con dibaco",
+     "10": "Falta mucha doc pe",
+     "11": "Deficiente doc técnica en obra",
+     "24": "No llego casco y botines aún"
+    },
+    "d": {}
+   },
+   "PRC|2026-10": {
+    "i": {
+     "1": [
+      0
+     ],
+     "2": [
+      null
+     ],
+     "3": [
+      1
+     ],
+     "4": [
+      1
+     ],
+     "5": [
+      1
+     ],
+     "6": [
+      1
+     ],
+     "7": [
+      1
+     ],
+     "8": [
+      0
+     ],
+     "9": [
+      1
+     ],
+     "10": [
+      1
+     ],
+     "11": [
+      1
+     ],
+     "12": [
+      1
+     ],
+     "13": [
+      1
+     ],
+     "14": [
+      1
+     ],
+     "15": [
+      0
+     ],
+     "16": [
+      1
+     ],
+     "17": [
+      1
+     ],
+     "18": [
+      1
+     ],
+     "19": [
+      1
+     ],
+     "20": [
+      1
+     ],
+     "21": [
+      1
+     ],
+     "22": [
+      1
+     ],
+     "23": [
+      1
+     ],
+     "24": [
+      0
+     ],
+     "25": [
+      1
+     ],
+     "26": [
+      1
+     ],
+     "27": [
+      1
+     ],
+     "28": [
+      1
+     ],
+     "29": [
+      1
+     ],
+     "30": [
+      1
+     ]
+    },
+    "o": {
+     "8": "Cerca 21 días",
+     "15": "Mat cerca",
+     "24": "Falta casco y botines"
+    },
+    "d": {}
+   },
+   "CE|2026-10": {
+    "i": {
+     "1": [
+      null
+     ],
+     "3": [
+      1
+     ],
+     "4": [
+      null
+     ],
+     "6": [
+      1
+     ],
+     "7": [
+      1
+     ],
+     "8": [
+      1
+     ],
+     "9": [
+      1
+     ],
+     "10": [
+      0
+     ],
+     "11": [
+      0
+     ],
+     "12": [
+      null
+     ],
+     "13": [
+      1
+     ],
+     "14": [
+      1
+     ],
+     "15": [
+      1
+     ],
+     "16": [
+      1
+     ],
+     "17": [
+      0
+     ],
+     "18": [
+      1
+     ],
+     "19": [
+      0
+     ],
+     "20": [
+      1
+     ],
+     "21": [
+      1
+     ],
+     "22": [
+      1
+     ],
+     "24": [
+      1
+     ],
+     "28": [
+      1
+     ],
+     "29": [
+      0
+     ]
+    },
+    "o": {},
+    "d": {}
+   },
+   "TPL|2026-10": {
+    "i": {
+     "28": [
+      1
+     ],
+     "29": [
+      0
+     ]
+    },
+    "o": {},
+    "d": {}
+   }
+  },
+  "inf": {
+   "MZ|2026-09": {
+    "txt": {
+     "PLANIFICACION": {
+      "dt": "Planifica pero no comunica en Discord",
+      "obra": ""
+     },
+     "COORDINACION": {
+      "dt": "ok",
+      "obra": ""
+     },
+     "DOCUMENTACION": {
+      "dt": "No usa libro de comunicación formal con el contratista",
+      "obra": ""
+     },
+     "MATERIALES": {
+      "dt": "ok",
+      "obra": ""
+     },
+     "CALIDAD": {
+      "dt": "Falta registrar recespcion de trabajos y check list de calidad",
+      "obra": ""
+     },
+     "HyS. Y OBRA": {
+      "dt": "Realiza los controles pero no los asienta en libro (hay Hys de la contratista)",
+      "obra": ""
+     },
+     "ADMINISTRACION": {
+      "dt": "ok",
+      "obra": ""
+     },
+     "REPORTING": {
+      "dt": "Faltan los reportes semanales para clientes",
+      "obra": ""
+     }
+    },
+    "ind": {
+     "desvios": {
+      "dt": null,
+      "total": null
+     },
+     "pendientes": {
+      "dt": null
+     },
+     "retrabajos": {
+      "dt": null,
+      "resp": ""
+     },
+     "paralizaciones": {
+      "dt": null
+     }
+    }
+   },
+   "EF|2026-09": {
+    "txt": {},
+    "ind": {
+     "desvios": {
+      "dt": null,
+      "total": null
+     }
+    }
+   },
+   "TPL|2026-09": {
+    "txt": {
+     "PLANIFICACION": {
+      "dt": "No se previo la lluvia (obra anegada x 2 días)",
+      "obra": "TPL sigue sin definir NPT"
+     },
+     "COORDINACION": {
+      "dt": "ok",
+      "obra": ""
+     },
+     "DOCUMENTACION": {
+      "dt": "No hay planos en la Oficina, ni libro OS y NP",
+      "obra": "El PE lo va a desarrollar SV con la supervision de JMT"
+     },
+     "MATERIALES": {
+      "dt": "al principio no usaba trello, despues se acomodó",
+      "obra": "Se esta gestionando según Plan de compras."
+     },
+     "CALIDAD": {
+      "dt": "Hay control, pero no uso check list de calidad",
+      "obra": "normal"
+     },
+     "HyS. Y OBRA": {
+      "dt": "Falta control semanal de 5 puntos basiscos",
+      "obra": "normal"
+     },
+     "ADMINISTRACION": {
+      "dt": "ok",
+      "obra": "TPL atraso certificados pero ya se ajusto con Gabriela"
+     },
+     "REPORTING": {
+      "dt": "ok",
+      "obra": ""
+     }
+    },
+    "ind": {
+     "desvios": {
+      "dt": null,
+      "total": null
+     },
+     "pendientes": {
+      "dt": null,
+      "total": null,
+      "obs": ""
+     },
+     "retrabajos": {
+      "dt": null,
+      "total": null
+     },
+     "paralizaciones": {
+      "dt": null,
+      "total": null
+     }
+    }
+   },
+   "PRC|2026-09": {
+    "txt": {
+     "PLANIFICACION": {
+      "dt": "Planifica pero no usa la minuta",
+      "obra": "Se anticipo compra 3 meses"
+     },
+     "COORDINACION": {
+      "dt": "conforme",
+      "obra": "El 07 ingresa nueva pilotera. Y se prevee terminar a mediados del mes de octubre."
+     },
+     "DOCUMENTACION": {
+      "dt": "No pudo armar oficina con planimetria.",
+      "obra": "Debido a demoras de VAS"
+     },
+     "MATERIALES": {
+      "dt": "Reenvio pedido de materiales de Contratista (3 meses de provision ) sin controlar la prevision y se tuvo que estudiar de nuevo en Of. Tec.",
+      "obra": "Ya compraron los materiales previstos para 3 meses. Se coordinan entregas parciales."
+     },
+     "CALIDAD": {
+      "dt": "conforme (usa check list de control)",
+      "obra": "Mejorar Cerca"
+     },
+     "HyS. Y OBRA": {
+      "dt": "Realiza el control sin asentar en libro.",
+      "obra": "Se pidio cascos y Botines a medias con Contratista."
+     },
+     "ADMINISTRACION": {
+      "dt": "conforme",
+      "obra": ""
+     },
+     "REPORTING": {
+      "dt": "conforme",
+      "obra": ""
+     }
+    },
+    "ind": {
+     "desvios": {
+      "dt": null
+     },
+     "pendientes": {
+      "dt": null
+     },
+     "retrabajos": {
+      "dt": null
+     },
+     "paralizaciones": {
+      "dt": null
+     }
+    }
+   },
+   "CE|2026-09": {
+    "txt": {
+     "PLANIFICACION": {
+      "dt": "",
+      "obra": ""
+     },
+     "COORDINACION": {
+      "dt": "",
+      "obra": ""
+     },
+     "DOCUMENTACION": {
+      "dt": "",
+      "obra": ""
+     },
+     "MATERIALES": {
+      "dt": "",
+      "obra": ""
+     },
+     "CALIDAD": {
+      "dt": "",
+      "obra": ""
+     },
+     "HyS. Y OBRA": {
+      "dt": "",
+      "obra": ""
+     },
+     "ADMINISTRACION": {
+      "dt": "",
+      "obra": ""
+     },
+     "REPORTING": {
+      "dt": "",
+      "obra": ""
+     }
+    },
+    "ind": {}
+   },
+   "SYB|2026-09": {
+    "txt": {
+     "PLANIFICACION": {
+      "dt": "Aun no desarrollo su propia Planificacion, esta gestionando con planificacion Orginal.",
+      "obra": "La obra viene retrasada una semana por DIBACO"
+     },
+     "COORDINACION": {
+      "dt": "Hay buena coordinacion",
+      "obra": ""
+     },
+     "DOCUMENTACION": {
+      "dt": "La Dt esta gestionando adecuadamente.",
+      "obra": "Hay un retraso significativo en el PE Apto obra."
+     },
+     "MATERIALES": {
+      "dt": "Gestion Buena gestion",
+      "obra": "Se corrigio un desvio en el proceso de compras para restar las demoras en las entregas."
+     },
+     "CALIDAD": {
+      "dt": "Cuenta con muchos controles de calidad",
+      "obra": "Se produjo retrabajos en obra debido a cambios en el proyecto"
+     },
+     "HyS. Y OBRA": {
+      "dt": "Realiza los controles, pero no los documenta en libro. Debe mejorar",
+      "obra": "Cumple con las condiciones establecidas"
+     },
+     "ADMINISTRACION": {
+      "dt": "Se ejecutan los certificados en tiempo y forma",
+      "obra": "Ok"
+     },
+     "REPORTING": {
+      "dt": "Se reporta adecuadamente los informes solicitados",
+      "obra": "-"
+     }
+    },
+    "ind": {
+     "desvios": {
+      "dt": null
+     },
+     "pendientes": {
+      "dt": null
+     },
+     "retrabajos": {
+      "dt": null
+     },
+     "paralizaciones": {
+      "dt": null
+     }
+    }
+   },
+   "MZ|2026-08": {
+    "txt": {},
+    "ind": {
+     "desvios": {
+      "dt": null
+     },
+     "pendientes": {
+      "dt": null
+     },
+     "retrabajos": {
+      "dt": null
+     },
+     "paralizaciones": {
+      "dt": null
+     }
+    }
+   },
+   "PRC|2026-08": {
+    "txt": {},
+    "ind": {
+     "desvios": {
+      "dt": null
+     },
+     "pendientes": {
+      "dt": null
+     },
+     "retrabajos": {
+      "dt": null
+     },
+     "paralizaciones": {
+      "dt": null
+     }
+    }
+   },
+   "SYB|2026-08": {
+    "txt": {},
+    "ind": {
+     "desvios": {
+      "dt": null
+     },
+     "pendientes": {
+      "dt": null
+     },
+     "retrabajos": {
+      "dt": null
+     },
+     "paralizaciones": {
+      "dt": null
+     }
+    }
+   }
+  },
+  "desvios": [
+   {
+    "id": "a9sou42",
+    "fecha": "2026-09-15",
+    "obra": "EF",
+    "evento": "Desprovision de materiales (hierro, cemento, aridos) Construbanda",
+    "tipo": "Proveedores",
+    "detecta": "Otro",
+    "impDias": 2,
+    "plan": "Hacer firmar compromiso con Construbanda- y ver de comprar el saldo con el cliente",
+    "fechaPA": "2026-10-13",
+    "resp": "Ruben Jaime",
+    "estado": "abierto",
+    "prio": "normal"
+   },
+   {
+    "id": "b8882hi",
+    "fecha": "2026-09-15",
+    "obra": "EF",
+    "evento": "Inasistencia personal contratista",
+    "tipo": "Cliente",
+    "detecta": "DT",
+    "impDias": 2,
+    "plan": "Preveer 10 días antes el pago",
+    "fechaPA": "2026-09-17",
+    "resp": "Ruben Jaime",
+    "estado": "cerrado",
+    "prio": "urgente"
+   },
+   {
+    "id": "k3yhyue",
+    "fecha": "2026-08-12",
+    "obra": "TPL",
+    "evento": "Cambio niveles de proyecto",
+    "tipo": "Cliente",
+    "detecta": "CO",
+    "impDias": null,
+    "plan": "Solicitar permiso para avanzar con fustes mas largos y nivel original",
+    "fechaPA": "2026-08-18",
+    "resp": "Acardi",
+    "estado": "en curso",
+    "prio": "urgente",
+    "paral": ""
+   },
+   {
+    "id": "9g0ji3o",
+    "fecha": "2026-08-13",
+    "obra": "TPL",
+    "evento": "Movimiento de suelo para replanteo",
+    "tipo": "Cliente",
+    "detecta": "CO",
+    "impDias": 5,
+    "plan": "Iniciar con obrador para ganar tiempo",
+    "fechaPA": "2026-08-18",
+    "resp": "Topa",
+    "estado": "cerrado",
+    "prio": "alta"
+   },
+   {
+    "id": "ikxoq0y",
+    "fecha": "2026-09-07",
+    "obra": "TPL",
+    "evento": "Modificacion de proyecto sector norte",
+    "tipo": "Cliente",
+    "detecta": "Otro",
+    "impDias": 23,
+    "plan": "Suspender sector Norte, Continuar con sector Sur Hasta que tengamos aprobado.",
+    "fechaPA": "2026-10-30",
+    "resp": "P.E.",
+    "estado": "cerrado",
+    "prio": "alta"
+   },
+   {
+    "id": "thrabr0",
+    "fecha": "2026-09-29",
+    "obra": "TPL",
+    "evento": "Lluvia y anegamiento",
+    "tipo": "Condiciones del sitio",
+    "detecta": "DT",
+    "impDias": 2,
+    "plan": "tener equipo a mano para sacar agua bien pare y llenar las bases que esten terminadas.",
+    "fechaPA": "2026-10-02",
+    "resp": "Topa",
+    "estado": "cerrado",
+    "prio": "crítico",
+    "paral": "no"
+   },
+   {
+    "id": "3cltcr0",
+    "fecha": "2026-09-05",
+    "obra": "PRC",
+    "evento": "Mejorar Cerca de Obra y obrador",
+    "tipo": "Coordinación interna",
+    "detecta": "Otro",
+    "impDias": 0,
+    "plan": "Ejecutar modelo de cerca, porton para implementar en todas las obras y ejecutar",
+    "fechaPA": "2026-09-08",
+    "resp": "Adolfo Villoldo",
+    "estado": "cerrado",
+    "prio": "normal"
+   },
+   {
+    "id": "ef99pd7",
+    "fecha": "2026-09-08",
+    "obra": "PRC",
+    "evento": "PE Estrura SS yPB Demorado (08/09 debia entregar) al 18/09 genero desvios",
+    "tipo": "Proveedores",
+    "detecta": "Otro",
+    "impDias": 22,
+    "plan": "VAS debe entregar hasta el 22/09",
+    "fechaPA": "2026-09-30",
+    "resp": "Victor Zelaya",
+    "estado": "cerrado",
+    "prio": "crítico"
+   },
+   {
+    "id": "3rld7z3",
+    "fecha": "2026-09-10",
+    "obra": "PRC",
+    "evento": "Falta de provision Aridos",
+    "tipo": "Coordinación interna",
+    "detecta": "DT",
+    "impDias": 8,
+    "plan": "Se propone cubrir la excavacion hasta que llegue el arido. Se ordena hacer pedido para 3 meses de obra para evitar molestar al CL todas las semanas x mat.",
+    "fechaPA": "2026-09-18",
+    "resp": "Paula Carrizo",
+    "estado": "cerrado",
+    "prio": "urgente"
+   },
+   {
+    "id": "z3425ot",
+    "fecha": "2026-09-24",
+    "obra": "PRC",
+    "evento": "Coordinacion de Certificación Contratista",
+    "tipo": "Coordinación interna",
+    "detecta": "Otro",
+    "impDias": null,
+    "plan": "Calendarizar la obra y que AV intervenga en el Proceso de certificado de todas las obras",
+    "fechaPA": "2026-09-25",
+    "resp": "Adolfo Villoldo",
+    "estado": "cerrado",
+    "prio": "alta"
+   },
+   {
+    "id": "sbb001c",
+    "fecha": "2026-09-28",
+    "obra": "PRC",
+    "evento": "Demoras excavacion pilotes Suelo con Piedras y rotura de mechas.",
+    "tipo": "Condiciones del sitio",
+    "detecta": "Otro",
+    "impDias": 9,
+    "plan": "Buscar alternativas de contratista pilotera rompe piedras.",
+    "fechaPA": "2026-10-08",
+    "resp": "Paula Carrizo",
+    "estado": "en curso",
+    "prio": "crítico"
+   },
+   {
+    "id": "yoa4sgw",
+    "fecha": "2026-09-29",
+    "obra": "PRC",
+    "evento": "Lluvia y anegamientoLluvias y anegamiento",
+    "tipo": "Condiciones del sitio",
+    "detecta": "DT",
+    "impDias": 2,
+    "plan": "desagotar con bombas una vez que pare de llover para poder continuar los trabajos.",
+    "fechaPA": "2026-10-01",
+    "resp": "Paula Carrizo",
+    "estado": "cerrado",
+    "prio": "crítico"
+   },
+   {
+    "id": "r01",
+    "fecha": "2026-09-02",
+    "obra": "CE",
+    "evento": "Se requiere planos APROBADOS de Cº yLº",
+    "tipo": "Cliente",
+    "detecta": "DT",
+    "impDias": null,
+    "plan": "solicitar aprobacion planos de cocina y estar",
+    "fechaPA": "2026-10-02",
+    "resp": "AV",
+    "estado": "cerrado",
+    "prio": "alta"
+   },
+   {
+    "id": "r02",
+    "fecha": "2026-09-15",
+    "obra": "CE",
+    "evento": "Demoras mayores a 12 días en compra de materiales CLIENTECielorraso.",
+    "tipo": "Cliente",
+    "detecta": "CO",
+    "impDias": null,
+    "plan": "coordinar con Cliente plazos del proceso desde req hasta la compra.",
+    "fechaPA": "2026-09-30",
+    "resp": "FP",
+    "estado": "cerrado",
+    "prio": "alta"
+   },
+   {
+    "id": "r03",
+    "fecha": "2026-07-29",
+    "obra": "CE",
+    "evento": "Compra de losa Radiante (cambios: 5/8, 17/9)",
+    "tipo": "Cliente",
+    "detecta": "",
+    "impDias": null,
+    "plan": "Cerrar compra losa radiante",
+    "fechaPA": "2026-10-02",
+    "resp": "RJ",
+    "estado": "cerrado",
+    "prio": "alta"
+   },
+   {
+    "id": "r04",
+    "fecha": "2026-09-03",
+    "obra": "CE",
+    "evento": "Definicion nueva posicion carpinteria Estar",
+    "tipo": "Cliente",
+    "detecta": "",
+    "impDias": null,
+    "plan": "Enviar a clienta para aprobacion",
+    "fechaPA": "2026-09-30",
+    "resp": "GER",
+    "estado": "en curso",
+    "prio": "alta"
+   },
+   {
+    "id": "ssr2guw",
+    "fecha": "2026-09-01",
+    "obra": "MZ",
+    "evento": "Compra de Chapas",
+    "tipo": "Cliente",
+    "detecta": "DT",
+    "impDias": 22,
+    "plan": "Solicitar compra al cliente",
+    "fechaPA": "2026-09-28",
+    "resp": "Fede Marti",
+    "estado": "cerrado",
+    "prio": "urgente",
+    "paral": "",
+    "retrab": ""
+   },
+   {
+    "id": "b3or5b3",
+    "fecha": "2026-10-13",
+    "obra": "PRC",
+    "evento": "Avances de cabezales demorados por falta planos cuando se gestionó la compra (perfiles ipn upn)",
+    "tipo": "Coordinación interna",
+    "detecta": "DT",
+    "impDias": null,
+    "plan": "a)- cambiar por material comprado (consultar a Maxi) \nb)- comprar los PN que hagan falta para no frenar el avance \nYresuelto el material llenar a mano antes del proximo certificado.",
+    "fechaPA": "2026-10-23",
+    "resp": "Paula Carrizo",
+    "estado": "abierto",
+    "prio": "alta",
+    "retrab": "",
+    "paral": ""
+   },
+   {
+    "id": "k9v7roi",
+    "fecha": "2026-10-13",
+    "obra": "TPL",
+    "evento": "Lluvia y anegamiento",
+    "tipo": "Condiciones del sitio",
+    "detecta": "DT",
+    "impDias": 1,
+    "plan": "Se retira el personal a las 9:45 y queda capataz hasta que llegue el sereno para cuidarla obra.",
+    "fechaPA": "2026-09-14",
+    "resp": "",
+    "estado": "cerrado",
+    "prio": "crítico",
+    "retrab": "",
+    "paral": "no"
+   },
+   {
+    "id": "sf5tubz",
+    "fecha": "2026-10-08",
+    "obra": "MZ",
+    "evento": "Falta de cemento en obra",
+    "tipo": "Proveedores",
+    "detecta": "DT",
+    "impDias": null,
+    "plan": "A) comprar nuevo\nB) entregar construbanda",
+    "fechaPA": "2026-10-14",
+    "resp": "Construbanda",
+    "estado": "abierto",
+    "prio": "crítico",
+    "retrab": "",
+    "paral": ""
+   },
+   {
+    "id": "64r1ep9",
+    "fecha": "2026-10-15",
+    "obra": "CE",
+    "evento": "Tatin puede sumar mas Gente (Oportunidad de mejora)",
+    "tipo": "Proveedores",
+    "detecta": "DT",
+    "impDias": null,
+    "plan": "Consultar CL si podremos certificar mas.\nRespuesta: Se le indica que no debido a que la clienta no elevo el tope de Certificados.",
+    "fechaPA": "2026-10-15",
+    "resp": "Tatin",
+    "estado": "cerrado",
+    "prio": "normal",
+    "retrab": "",
+    "paral": ""
+   }
+  ],
+  "compras": [
+   {
+    "obra": "CE",
+    "req": "REQ. Nº 004",
+    "desc": "panel FOILROOF techo",
+    "inicio": "2026-02-04",
+    "fin": "2026-03-30",
+    "pedidos": 3,
+    "entregados": null,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "20/3 El Cliente tiene ya la factura de Norry para ser abonada",
+    "id": "c01"
+   },
+   {
+    "obra": "CE",
+    "req": "REQ. Nº 005",
+    "desc": "perfiles techo",
+    "inicio": "2026-02-04",
+    "fin": "2026-03-30",
+    "pedidos": 3,
+    "entregados": null,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "20/3 Sin novedades",
+    "id": "c02"
+   },
+   {
+    "obra": "MZ",
+    "req": "REQ Nº 013",
+    "desc": "Viguetines + bovedillas",
+    "inicio": "2026-02-27",
+    "fin": "2026-03-30",
+    "pedidos": 18,
+    "entregados": 0,
+    "pIni": 31170000,
+    "pCompra": 22000000,
+    "obs": "13/3 no se consigue CB; 18/3 DT corrije pedido; 25/3 PPTO para comprar cliente.",
+    "id": "c03"
+   },
+   {
+    "obra": "MZ",
+    "req": "REQ Nº 014",
+    "desc": "Hierro + arena + aditivo",
+    "inicio": "2026-03-03",
+    "fin": "2026-03-18",
+    "pedidos": 6,
+    "entregados": 6,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c04"
+   },
+   {
+    "obra": "RM-T",
+    "req": "REQ Nº 103",
+    "desc": "revestimiento",
+    "inicio": "2026-03-06",
+    "fin": "2026-03-11",
+    "pedidos": 1,
+    "entregados": 1,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c05"
+   },
+   {
+    "obra": "RM-T",
+    "req": "REQ Nº 101",
+    "desc": "Gas",
+    "inicio": "2026-03-06",
+    "fin": "2026-03-12",
+    "pedidos": 2,
+    "entregados": 2,
+    "pIni": 2040000,
+    "pCompra": 1740000,
+    "obs": "",
+    "id": "c06"
+   },
+   {
+    "obra": "RM-T",
+    "req": "REQ Nº 100",
+    "desc": "terminaciones",
+    "inicio": "2026-03-06",
+    "fin": "2026-03-16",
+    "pedidos": 2,
+    "entregados": 4,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "17/3: SE UNION CON REQ Nº 110",
+    "id": "c07"
+   },
+   {
+    "obra": "RM-T",
+    "req": "REQ Nº 104",
+    "desc": "Piedras",
+    "inicio": "2026-03-06",
+    "fin": "2026-03-18",
+    "pedidos": 1,
+    "entregados": 1,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c08"
+   },
+   {
+    "obra": "RM-T",
+    "req": "REQ Nº 102",
+    "desc": "Iluminacion Ext",
+    "inicio": "2026-03-06",
+    "fin": "2026-03-30",
+    "pedidos": 3,
+    "entregados": null,
+    "pIni": 2749000,
+    "pCompra": null,
+    "obs": "17/03 se habló con ambos proveedores para que avisen la llegada de los apliques y coordinar entrega. STUMOL (25 días desde el pedido) - TUC ELECTRICA (15 días)",
+    "id": "c09"
+   },
+   {
+    "obra": "CE",
+    "req": "REQ Nº 001",
+    "desc": "cemento hercal",
+    "inicio": "2026-03-10",
+    "fin": "2026-03-13",
+    "pedidos": 3,
+    "entregados": 3,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c10"
+   },
+   {
+    "obra": "RM-T",
+    "req": "REQ Nº106",
+    "desc": "Material para rejas de canal",
+    "inicio": "2026-03-10",
+    "fin": "2026-03-13",
+    "pedidos": 5,
+    "entregados": 5,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c11"
+   },
+   {
+    "obra": "CE",
+    "req": "REQ Nº 003",
+    "desc": "sikadur 31",
+    "inicio": "2026-03-10",
+    "fin": "2026-03-20",
+    "pedidos": 2,
+    "entregados": 2,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c12"
+   },
+   {
+    "obra": "RM-T",
+    "req": "REQ Nº 107",
+    "desc": "Material p/ Acceso",
+    "inicio": "2026-03-11",
+    "fin": "2026-03-17",
+    "pedidos": 8,
+    "entregados": 8,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c13"
+   },
+   {
+    "obra": "CE",
+    "req": "REQ Nº 002",
+    "desc": "adhesivo retack",
+    "inicio": "2026-03-11",
+    "fin": "2026-03-18",
+    "pedidos": 3,
+    "entregados": 3,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c14"
+   },
+   {
+    "obra": "EF",
+    "req": "REQ. Nº 002",
+    "desc": "plastico negro",
+    "inicio": "2026-03-12",
+    "fin": "2026-03-19",
+    "pedidos": 2,
+    "entregados": 2,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c15"
+   },
+   {
+    "obra": "RM-T",
+    "req": "REQ Nº 108",
+    "desc": "Iluminacion acceso + perimetro",
+    "inicio": "2026-03-12",
+    "fin": "2026-03-30",
+    "pedidos": 4,
+    "entregados": null,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c16"
+   },
+   {
+    "obra": "RM-T",
+    "req": "REQ Nº 110",
+    "desc": "materiales para rejas canal 2",
+    "inicio": "2026-03-18",
+    "fin": "2026-03-19",
+    "pedidos": 4,
+    "entregados": 4,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c17"
+   },
+   {
+    "obra": "MZ",
+    "req": "REQ Nº 015",
+    "desc": "Consumibles- Discos y mechas",
+    "inicio": "2026-03-18",
+    "fin": "2026-03-25",
+    "pedidos": 3,
+    "entregados": 3,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c18"
+   },
+   {
+    "obra": "RM-T",
+    "req": "REQ Nº 109",
+    "desc": "materiales para Ildarraz",
+    "inicio": "2026-03-18",
+    "fin": "2026-03-30",
+    "pedidos": 1,
+    "entregados": null,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c19"
+   },
+   {
+    "obra": "EF",
+    "req": "REQ. Nº 005",
+    "desc": "Mat p/ tabiques",
+    "inicio": "2026-03-20",
+    "fin": "2026-03-26",
+    "pedidos": 12,
+    "entregados": 8,
+    "pIni": 100,
+    "pCompra": 95,
+    "obs": "Hierros + fenolicos (ver con contratista)",
+    "id": "c20"
+   },
+   {
+    "obra": "MZ",
+    "req": "REQ Nº 016",
+    "desc": "Hº Elab + aditivo",
+    "inicio": "2026-03-20",
+    "fin": "2026-03-27",
+    "pedidos": 3,
+    "entregados": 3,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c21"
+   },
+   {
+    "obra": "EF",
+    "req": "REQ. Nº 005-BIS",
+    "desc": "Mat p/ tabiques",
+    "inicio": "2026-03-20",
+    "fin": "2026-03-30",
+    "pedidos": 4,
+    "entregados": 0,
+    "pIni": 200,
+    "pCompra": 195,
+    "obs": "Solo Fenolicos",
+    "id": "c22"
+   },
+   {
+    "obra": "EF",
+    "req": "REQ. Nº 006",
+    "desc": "Cloacal - Agua",
+    "inicio": "2026-03-20",
+    "fin": "2026-03-30",
+    "pedidos": 36,
+    "entregados": 0,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c23"
+   },
+   {
+    "obra": "RM-T",
+    "req": "REQ Nº 111",
+    "desc": "Microcemento",
+    "inicio": "2026-03-20",
+    "fin": "2026-03-30",
+    "pedidos": 12,
+    "entregados": null,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c24"
+   },
+   {
+    "obra": "RM-T",
+    "req": "REQ Nº 112",
+    "desc": "Granza",
+    "inicio": "2026-03-20",
+    "fin": "2026-03-30",
+    "pedidos": 1,
+    "entregados": null,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c25"
+   },
+   {
+    "id": "c26",
+    "obra": "RM-T",
+    "req": "REQ Nº 113",
+    "desc": "Greenblock",
+    "inicio": "2026-03-25",
+    "fin": "2026-09-30",
+    "pedidos": 1,
+    "entregados": null,
+    "pIni": null,
+    "pCompra": null,
+    "obs": ""
+   },
+   {
+    "id": "c27",
+    "obra": "MZ",
+    "req": "REQ Nº 017",
+    "desc": "barras de hierro",
+    "inicio": "2026-03-27",
+    "fin": "2026-10-09",
+    "pedidos": 6,
+    "entregados": null,
+    "pIni": null,
+    "pCompra": null,
+    "obs": ""
+   },
+   {
+    "obra": "CE",
+    "req": "REQ. Nº 006",
+    "desc": "Arena",
+    "inicio": "2026-03-30",
+    "fin": null,
+    "pedidos": 1,
+    "entregados": null,
+    "pIni": null,
+    "pCompra": null,
+    "obs": "",
+    "id": "c28"
+   }
+  ],
+  "obsDT": {
+   "2026-09": {
+    "sv": "Antiguedad 1 mes",
+    "fm": "Antiguedad 12 mes",
+    "fp": "Antiguedad 24 mes",
+    "nb": "Antiguedad 18 mes",
+    "fr": "Antiguedad 1 mes",
+    "_gral": "Debido a la implementacion de los controles se toma la primera semana de septiembre al 100%."
+   }
+  }
+ },
+ "app": {
+  "descripcion": "Página HTML de un solo archivo con 5 pestañas: Tablero, Carga semanal, Desvíos (con indicadores de gestión), Compras, Obras y DT. Modo claro y oscuro. Guarda en la base de datos del artifact y en el navegador. Botón de copia de seguridad (.json).",
+  "html": "<title>Coordinación de Obras</title>\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link href=\"https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap\" rel=\"stylesheet\">\n<style>\n/* Layout: encabezado fijo con período y estado de guardado, pestañas por tarea, contenido a ancho de 1200px.\n   Tablero = resumen arriba (4 cifras), obras ordenadas de peor a mejor, mapa por bloque, desempeño por DT. */\n:root{\n  --bg:#e7eaed; --card:#f5f6f8; --ink:#16202a; --ink2:#46535f; --mute:#74818d; --line:#cdd3d9; --line2:#dde1e5;\n  --accent:#1f5fa8; --accent-ink:#ffffff; --accent-soft:#d5e3f3;\n  --good:#2a7a4b; --good-soft:#d6ebdd; --warn:#a96a10; --warn-soft:#f3e4c4; --bad:#b0372b; --bad-soft:#f4d8d4;\n  --f-display:'Barlow Condensed','Arial Narrow',sans-serif; --f-body:'IBM Plex Sans',system-ui,sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,monospace;\n}\n@media (prefers-color-scheme: dark){:root:not([data-theme=\"light\"]){\n  --bg:#11161b; --card:#192027; --ink:#e5eaef; --ink2:#a9b4bf; --mute:#7a8793; --line:#2c3640; --line2:#232c34;\n  --accent:#6aa8ea; --accent-ink:#0d1620; --accent-soft:#1d3347;\n  --good:#5cbb85; --good-soft:#1c3427; --warn:#e2ac4c; --warn-soft:#3a2f17; --bad:#ef8070; --bad-soft:#3e2320; color-scheme:dark}}\n:root[data-theme=\"dark\"]{\n  --bg:#11161b; --card:#192027; --ink:#e5eaef; --ink2:#a9b4bf; --mute:#7a8793; --line:#2c3640; --line2:#232c34;\n  --accent:#6aa8ea; --accent-ink:#0d1620; --accent-soft:#1d3347;\n  --good:#5cbb85; --good-soft:#1c3427; --warn:#e2ac4c; --warn-soft:#3a2f17; --bad:#ef8070; --bad-soft:#3e2320; color-scheme:dark}\n*{box-sizing:border-box}\nbody{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45;padding-inline:16px;padding-block:0 40px}\nbutton,input,select,textarea{font:inherit;color:inherit}\n.wrap{max-width:1200px;margin-inline:auto}\nheader.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;padding-block:14px 10px}\n.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;min-width:0}\n.brand h1{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:.06em;text-transform:uppercase;margin:0}\n.brand span{color:var(--mute);font-size:12px;letter-spacing:.04em}\n.ctrl{display:flex;align-items:center;gap:12px;flex-wrap:wrap}\n.ctrl label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:8px}\ninput[type=month],input[type=date],input[type=number],input[type=text],select,textarea{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:6px 8px;min-width:0}\ninput:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}\n.save{font-family:var(--f-mono);font-size:11px;color:var(--mute);display:flex;align-items:center;gap:6px}\n.save i{width:7px;height:7px;border-radius:50%;background:var(--mute);display:inline-block}\n.save.ok i{background:var(--good)} .save.err i{background:var(--bad)} .save.saving i{background:var(--warn)}\nnav.tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:18px}\nnav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:9px 14px;cursor:pointer;color:var(--ink2);font-weight:500;white-space:nowrap}\nnav.tabs button[aria-current=true]{color:var(--ink);border-bottom-color:var(--accent)}\nh2{font-family:var(--f-display);font-weight:600;font-size:20px;letter-spacing:.05em;text-transform:uppercase;margin:0 0 4px}\n.sub{color:var(--mute);font-size:12.5px;margin:0 0 12px}\nsection.blk{margin-block:0 30px}\n.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border-block:1px solid var(--line);margin-bottom:28px}\n.stat{padding:14px 16px;border-right:1px solid var(--line2);min-width:0}\n.stat:last-child{border-right:0}\n.stat .k{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}\n.stat .v{font-family:var(--f-display);font-weight:600;font-size:40px;line-height:1.1;font-variant-numeric:tabular-nums}\n.stat .d{font-size:12px;color:var(--ink2)}\n.panel{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:14px 16px}\n.scroll{overflow-x:auto}\ntable{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}\nth{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--mute);font-weight:500;text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}\ntd{padding:8px 10px;border-bottom:1px solid var(--line2);vertical-align:middle}\ntd.num,th.num{text-align:right}\ntr.click{cursor:pointer} tr.click:hover td{background:var(--accent-soft)}\n.name{font-weight:600}\n.dim{color:var(--mute);font-size:12px}\n.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;padding:2px 8px;border-radius:10px;white-space:nowrap}\n.pill.good{background:var(--good-soft);color:var(--good)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.na{background:var(--line2);color:var(--mute)} .pill.acc{background:var(--accent-soft);color:var(--accent)}\n.bar{position:relative;height:10px;background:var(--line2);border-radius:2px;min-width:90px}\n.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:2px 0 0 2px}\n.bar i.good{background:var(--good)} .bar i.warn{background:var(--warn)} .bar i.bad{background:var(--bad)}\n.bar b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}\n.cellp{display:flex;align-items:center;gap:10px}\n.cellp .p{font-family:var(--f-mono);font-size:13px;width:38px;text-align:right}\n.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px;margin-bottom:30px}\n@media (max-width:860px){.two{grid-template-columns:minmax(0,1fr)}}\n.heat{display:grid;grid-template-columns:minmax(90px,1.2fr) repeat(8,minmax(44px,1fr));gap:2px;min-width:560px;font-size:12px}\n.heat .h{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);padding:4px 2px;text-align:center}\n.heat .o{padding:8px 4px 8px 0;font-weight:600;display:flex;align-items:center}\n.heat .c{padding:8px 2px;text-align:center;font-family:var(--f-mono);border-radius:2px}\n.c.good{background:var(--good-soft);color:var(--good)} .c.warn{background:var(--warn-soft);color:var(--warn)} .c.bad{background:var(--bad-soft);color:var(--bad)} .c.na{background:var(--line2);color:var(--mute)}\n.hbars{display:grid;gap:8px}\n.hb{display:grid;grid-template-columns:130px 1fr 28px;align-items:center;gap:8px;font-size:12.5px}\n.hb .t{height:12px;background:var(--line2);border-radius:2px;position:relative}\n.hb .t i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:2px}\n.hb .t i.o{background:var(--bad)}\n.list{display:grid;gap:0}\n.li{padding:9px 0;border-bottom:1px solid var(--line2);display:grid;gap:2px}\n.li:last-child{border-bottom:0}\n.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:3px;padding:7px 14px;font-weight:500;cursor:pointer}\n.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}\n.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--bad)}\n.btn.sm{padding:3px 9px;font-size:12px}\n.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}\n.grid-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 14px;margin-block:10px}\n.grid-f label{display:grid;gap:3px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}\n.grid-f label input,.grid-f label select,.grid-f label textarea{text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink);width:100%}\n.grid-f .wide{grid-column:1/-1}\n/* carga semanal */\n.ck{min-width:720px}\n.ck .bh td{background:var(--accent-soft);font-family:var(--f-display);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:14px;padding:6px 10px}\n.ck td.w{text-align:center;width:64px;padding:4px}\n.cb{width:50px;height:30px;border-radius:3px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:600;font-family:var(--f-mono);color:var(--mute)}\n.cb.y{background:var(--good-soft);color:var(--good);border-color:var(--good)}\n.cb.n{background:var(--bad-soft);color:var(--bad);border-color:var(--bad)}\n.cb[disabled]{opacity:.35;cursor:default;background:var(--line2)}\n.ck input.obs{width:100%;min-width:140px}\n.sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:3;background:var(--bg);padding-block:8px;border-bottom:1px solid var(--line);margin-bottom:12px}\n.empty{padding:26px;text-align:center;color:var(--ink2);border:1px dashed var(--line);border-radius:4px}\n.det td{background:var(--card)}\n.tag{font-family:var(--f-mono);font-size:11px;color:var(--mute)}\n.infrow{display:grid;grid-template-columns:120px minmax(0,1fr) minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--line2)}\n.infrow:last-child{border-bottom:0}\n@media (max-width:760px){.infrow{grid-template-columns:minmax(0,1fr)}}\n.auto{margin:4px 0 6px;padding-left:16px;color:var(--ink2);font-size:13px}\n.dest{width:64px;flex:none}\n.ig td{vertical-align:middle} .ig input[type=number]{width:70px} .ig input[type=text]{width:100%;min-width:150px}\n.ig tr.og td{border-top:2px solid var(--line)}\n.tg{border:1px solid var(--line);background:var(--card);color:var(--mute);border-radius:3px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer;min-width:52px}\n.tg.si{background:var(--bad-soft);color:var(--bad);border-color:var(--bad)}\n.tg.no{background:var(--good-soft);color:var(--good);border-color:var(--good)}\n.num-good{color:var(--good);font-weight:600} .num-bad{color:var(--bad);font-weight:600}\n@media (prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}\n</style>\n\n<div class=\"wrap\">\n  <header class=\"top\">\n    <div class=\"brand\"><h1>Coordinación de obras</h1><span id=\"sum\"></span></div>\n    <div class=\"ctrl\">\n      <label>Período <input type=\"month\" id=\"per\" data-act=\"per\"></label>\n      <div class=\"save\" id=\"save\"><i></i><span>Cargando</span></div>\n    </div>\n  </header>\n  <nav class=\"tabs\" id=\"tabs\"></nav>\n  <main id=\"app\"></main>\n</div>\n\n<script>\n//#LOGIC-START\nconst ITEMS=[{\"n\": 1, \"b\": \"PLANIFICACION\", \"t\": \"Cumplimiento de Hitos Mensuales\", \"ins\": \"CALENDARIO\", \"fr\": \"QUINCENAL\"}, {\"n\": 2, \"b\": \"PLANIFICACION\", \"t\": \"Gantt actualizado\", \"ins\": \"GANTT\", \"fr\": \"MENSUAL\"}, {\"n\": 3, \"b\": \"PLANIFICACION\", \"t\": \"Planificación y seguimiento semanal (Minuta semanal)\", \"ins\": \"ITEMIZADO\", \"fr\": \"SEMANAL\"}, {\"n\": 4, \"b\": \"PLANIFICACION\", \"t\": \"Detección temprana de desvíos\", \"ins\": \"DISCORD / ITEMIZADO\", \"fr\": \"EVENTUAL\"}, {\"n\": 5, \"b\": \"PLANIFICACION\", \"t\": \"Plan de acción ante desvíos\", \"ins\": \"DISCORD\", \"fr\": \"EVENTUAL\"}, {\"n\": 6, \"b\": \"COORDINACION\", \"t\": \"Coordinación de gremios y contratistas\", \"ins\": \"DISCORD\", \"fr\": \"SEMANAL\"}, {\"n\": 7, \"b\": \"COORDINACION\", \"t\": \"Coordinación de tareas entre rubros\", \"ins\": \"ITEMIZADO\", \"fr\": \"SEMANAL\"}, {\"n\": 8, \"b\": \"COORDINACION\", \"t\": \"Seguimiento de pendientes\", \"ins\": \"ITEMIZADO\", \"fr\": \"SEMANAL\"}, {\"n\": 9, \"b\": \"COORDINACION\", \"t\": \"Resolución / seguimiento de interferencias\", \"ins\": \"DISCORD\", \"fr\": \"SEMANAL\"}, {\"n\": 10, \"b\": \"DOCUMENTACION\", \"t\": \"Gestión doc. Tec. disponible y actualizada APTO OBRA\", \"ins\": \"PLANILLA\", \"fr\": \"SEMANAL\"}, {\"n\": 11, \"b\": \"DOCUMENTACION\", \"t\": \"Actualización de documentación de obra\", \"ins\": \"PLANO / REGISTRO\", \"fr\": \"SEMANAL\"}, {\"n\": 12, \"b\": \"DOCUMENTACION\", \"t\": \"Gestión permisos municipales y administrativos de obra\", \"ins\": \"CHECK LIST\", \"fr\": \"SEMANAL\"}, {\"n\": 13, \"b\": \"DOCUMENTACION\", \"t\": \"Gestión de Documentación técnica\", \"ins\": \"PLANO / REGISTRO\", \"fr\": \"SEMANAL\"}, {\"n\": 14, \"b\": \"DOCUMENTACION\", \"t\": \"Libro de Ordenes de servicio / Nota de Pedido\", \"ins\": \"LIBRO\", \"fr\": \"SEMANAL\"}, {\"n\": 15, \"b\": \"MATERIALES\", \"t\": \"Gestión y cierre de Requerimientos de compras\", \"ins\": \"TRELLO\", \"fr\": \"SEMANAL\"}, {\"n\": 16, \"b\": \"MATERIALES\", \"t\": \"Previsión y pedido de materiales\", \"ins\": \"TRELLO\", \"fr\": \"SEMANAL\"}, {\"n\": 17, \"b\": \"MATERIALES\", \"t\": \"Recepción, Stock y Faltantes de materiales\", \"ins\": \"PLANILLA\", \"fr\": \"SEMANAL\"}, {\"n\": 18, \"b\": \"MATERIALES\", \"t\": \"Control de calidad de materiales (check list, ensayos, etc, s/ corresponda)\", \"ins\": \"CHECK LIST\", \"fr\": \"SEMANAL\"}, {\"n\": 19, \"b\": \"MATERIALES\", \"t\": \"Verificación cómputos de materiales de contratistas\", \"ins\": \"PLANILLA\", \"fr\": \"SEMANAL\"}, {\"n\": 20, \"b\": \"CALIDAD\", \"t\": \"Control de calidad de EJECUCION DE TRABAJOS\", \"ins\": \"CHECK LIST\", \"fr\": \"SEMANAL\"}, {\"n\": 21, \"b\": \"CALIDAD\", \"t\": \"Detección / prevención de retrabajos\", \"ins\": \"CHECK LIST\", \"fr\": \"SEMANAL\"}, {\"n\": 22, \"b\": \"CALIDAD\", \"t\": \"Recepción de trabajos ejecutados\", \"ins\": \"ACTA / CHECK LIST\", \"fr\": \"SEMANAL\"}, {\"n\": 23, \"b\": \"HyS. Y OBRA\", \"t\": \"Layout de obra (Acceso, Descargas, Camineras, Acopio, Bº, etc.)\", \"ins\": \"CROQUIS\", \"fr\": \"MENSUAL\"}, {\"n\": 24, \"b\": \"HyS. Y OBRA\", \"t\": \"Control (EPP, Ord. y Limp., Trab. Altura, Riesgo Elect., Registro desvíos)\", \"ins\": \"CHECK LIST/ DISCORD\", \"fr\": \"SEMANAL\"}, {\"n\": 25, \"b\": \"ADMINISTRACION\", \"t\": \"Medición de Certificados quincenales Contratista\", \"ins\": \"PLANILLA\", \"fr\": \"QUINCENAL\"}, {\"n\": 26, \"b\": \"ADMINISTRACION\", \"t\": \"Gestión de cambios y adicionales\", \"ins\": \"PLANILLA\", \"fr\": \"EVENTUAL\"}, {\"n\": 27, \"b\": \"ADMINISTRACION\", \"t\": \"Medición de certificados Mensuales p/ cliente\", \"ins\": \"PLANILLA\", \"fr\": \"MENSUAL\"}, {\"n\": 28, \"b\": \"REPORTING\", \"t\": \"Informes diarios internos\", \"ins\": \"DISCORD\", \"fr\": \"DIARIO\"}, {\"n\": 29, \"b\": \"REPORTING\", \"t\": \"Informes SEMANAL p/ Cliente\", \"ins\": \"INFORME PDF\", \"fr\": \"SEMANAL\"}, {\"n\": 30, \"b\": \"REPORTING\", \"t\": \"Informe fotográfico y de avance MENSUAL P/ Cliente\", \"ins\": \"INFORME PDF\", \"fr\": \"MENSUAL\"}];\nconst BLOCKS=[['PLANIFICACION','Planificación'],['COORDINACION','Coordinación'],['DOCUMENTACION','Documentación'],['MATERIALES','Materiales'],['CALIDAD','Calidad'],['HyS. Y OBRA','HyS y obra'],['ADMINISTRACION','Administración'],['REPORTING','Reporting']];\nconst TIPOS=['Normativo','Técnico','Coordinación interna','Cliente','Proveedores','Condiciones del sitio'];\nconst ESTADOS=['abierto','en curso','cerrado'];\nconst PRIOS=['normal','alta','urgente','crítico'];\nconst IND=[['desvios','Desvíos detectados anticipadamente'],['pendientes','Pendientes cerrados'],['retrabajos','Retrabajos'],['paralizaciones','Paralizaciones evitables']];\nfunction defaultState(){return{v:1,\n  cfg:{meta:.8,alerta:.6,w:{PLANIFICACION:.15,COORDINACION:.15,DOCUMENTACION:.15,MATERIALES:.15,CALIDAD:.15,'HyS. Y OBRA':.05,ADMINISTRACION:.10,REPORTING:.10}},\n  dts:[{id:'fm',nombre:'Federico Marti'},{id:'fp',nombre:'Federico Periotti'},{id:'sv',nombre:'Sergio Villalba'},{id:'fr',nombre:'Florencia Ruiz'},{id:'nb',nombre:'Nahuel Bejarano'}],\n  obras:[{id:'MZ',nombre:'Martínez Zuccardi',dts:['fm'],activa:true},{id:'EF',nombre:'Eglof (EF LP16)',dts:['fp'],activa:true},{id:'TPL',nombre:'Acceso Terminal Panamericana Logística',dts:['sv'],activa:true},{id:'PRC',nombre:'Poviña · San Pablo Country',dts:['fr'],activa:true},{id:'CE',nombre:'Carletto',dts:['fp','nb'],activa:true},{id:'SYB',nombre:'Shopping YB',dts:['fr'],activa:true},{id:'RM-T',nombre:'RM-T (obra finalizada)',dts:[],activa:false}],\n  checks:{},inf:{},desvios:[],compras:[],obsDT:{}}}\nconst pad=n=>String(n).padStart(2,'0');\nconst isoToday=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};\nfunction isoWeek(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y0)/864e5+1)/7)}\nfunction weeksOf(per){const [y,m]=per.split('-').map(Number);const out=[];const last=new Date(y,m,0).getDate();for(let d=1;d<=last;d++){const dt=new Date(y,m-1,d);if(dt.getDay()===1){const e=new Date(y,m-1,d+6);out.push({n:isoWeek(dt),label:d+'–'+e.getDate()+(e.getMonth()!==m-1?'/'+(e.getMonth()+1):'')})}}return out}\nfunction prevPer(per){const [y,m]=per.split('-').map(Number);const d=new Date(y,m-2,1);return d.getFullYear()+'-'+pad(d.getMonth()+1)}\nconst appl=(it,wi)=>it.fr==='QUINCENAL'?wi%2===0:it.fr==='MENSUAL'?wi===0:true;\nfunction score(S,obra,per){\n  const ck=(S.checks[obra+'|'+per]||{}).i||{};const W=weeksOf(per);const bl={};\n  BLOCKS.forEach(b=>bl[b[0]]={cap:0,ev:0,ok:0,pct:null});\n  const wk=W.map(()=>({ev:0,ok:0}));\n  ITEMS.forEach(it=>{const row=ck[it.n]||[];W.forEach((_,wi)=>{if(appl(it,wi))bl[it.b].cap++;const v=row[wi];if(v===0||v===1){bl[it.b].ev++;if(v)bl[it.b].ok++;wk[wi].ev++;if(v)wk[wi].ok++}})});\n  let sw=0,sp=0,cap=0,ev=0;\n  BLOCKS.forEach(([k])=>{const b=bl[k];b.pct=b.ev?b.ok/b.ev:null;cap+=b.cap;ev+=b.ev;if(b.pct!==null){sw+=S.cfg.w[k];sp+=S.cfg.w[k]*b.pct}});\n  return{bl,pct:sw?sp/sw:null,carga:cap?Math.min(1,ev/cap):0,wk:wk.map(x=>x.ev?x.ok/x.ev:null),ev}}\nconst stat=(S,p)=>p==null?'na':p>=S.cfg.meta?'good':p>=S.cfg.alerta?'warn':'bad';\nconst vencido=d=>d.estado!=='cerrado'&&d.fechaPA&&d.fechaPA<isoToday();\nconst diasEntre=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);\nfunction compra(c){const ciclo=c.fin?diasEntre(c.inicio,c.fin):null;const transc=!c.fin&&c.inicio?diasEntre(c.inicio,isoToday()):null;\n  const ex=(c.entregados!=null&&c.pedidos)?c.entregados/c.pedidos:null;const ah=(c.pIni&&c.pCompra)?(c.pIni-c.pCompra)/c.pIni:null;return{ciclo,transc,ex,ah}}\nconst avg=a=>{a=a.filter(x=>x!=null);return a.length?a.reduce((s,x)=>s+x,0)/a.length:null};\nfunction dtObras(S,id){return S.obras.filter(o=>o.activa&&o.dts.includes(id))}\nfunction dtStats(S,id,per){\n  const os=dtObras(S,id);const sc=os.map(o=>score(S,o.id,per));const pv=os.map(o=>score(S,o.id,prevPer(per)).pct);\n  const ind={desvios:0,pendientes:0,retrabajos:0,paralizaciones:0};const ver={};let hasInd=false;\n  os.forEach(o=>{IND.forEach(([k])=>{const v=indVal(S,o.id,per,k);if(v.dt!=null){ind[k]+=v.dt;hasInd=true}})});\n  IND.forEach(([k])=>{let cur=0,prv=0,has=false,hp=false;os.forEach(o=>{const v=indVal(S,o.id,per,k),q=indVal(S,o.id,prevPer(per),k);if(v.dt!=null){cur+=v.dt;has=true}if(q.dt!=null){prv+=q.dt;hp=true}});ver[k]=has&&hp?verdict(k,cur,prv):'na'});\n  const ids=os.map(o=>o.id);const ds=S.desvios.filter(d=>ids.includes(d.obra)&&d.estado!=='cerrado');\n  const bl={};BLOCKS.forEach(([k])=>bl[k]=avg(sc.map(s=>s.bl[k].pct)));\n  return{os,sc,pct:avg(sc.map(s=>s.pct)),prev:avg(pv),carga:avg(sc.map(s=>s.carga)),ind,ver,hasInd,abiertos:ds.length,venc:ds.filter(vencido).length,bl}}\nconst OBJ={desvios:'asc',pendientes:'asc',retrabajos:'desc',paralizaciones:'desc'};\nconst monthOf=d=>(d||'').slice(0,7);\nfunction migrate(X){const D=defaultState();X=Object.assign(D,X);X.obsDT=X.obsDT||{};\n  Object.values(X.checks).forEach(c=>{c.i=c.i||{};c.o=c.o||{};c.d=c.d||{}});\n  Object.values(X.inf).forEach(x=>{x.txt=x.txt||{};x.ind=x.ind||{};IND.forEach(([k])=>{const v=x.ind[k];if(typeof v==='number')x.ind[k]={dt:v};else if(v===null||v===undefined)delete x.ind[k]})});\n  return X}\nfunction indVal(S,obra,per,k){\n  const e=(((S.inf[obra+'|'+per]||{}).ind)||{})[k]||{};\n  let dt=typeof e.dt==='number'?e.dt:null,total=typeof e.total==='number'?e.total:null,auto=false;\n  if(k==='desvios'){const reg=S.desvios.filter(d=>d.obra===obra&&monthOf(d.fecha)===per);\n    if(dt==null&&reg.length){dt=reg.filter(d=>d.detecta==='DT').length;auto=true}\n    if(total==null&&dt!=null){total=Math.max(reg.length,dt);auto=true}}\n  let resp=e.resp||'';\n  if(k==='retrabajos'||k==='paralizaciones'){const f=k==='retrabajos'?'retrab':'paral';const mes=S.desvios.filter(d=>d.obra===obra&&monthOf(d.fecha)===per);\n    if(mes.some(d=>d[f])){dt=mes.filter(d=>d[f]==='si').length;auto=true}\n    if(k==='retrabajos'&&!resp)resp=[...new Set(mes.filter(d=>d.retrab==='si').map(d=>d.resp).filter(Boolean))].join(', ')}\n  return{dt,total,res:(dt!=null&&total)?dt/total:null,resp,obs:e.obs||'',auto}}\nfunction verdict(k,cur,prev){if(cur==null||prev==null)return 'na';const d=cur-prev;\n  if(OBJ[k]==='asc')return d>0?'good':d<0?'bad':'na';\n  return d<0?'good':d>0?'bad':(cur===0?'good':'na')}\nfunction autoObs(S,obra,per,blockKey,dest){const c=S.checks[obra+'|'+per];if(!c)return [];\n  const man=(((S.inf[obra+'|'+per]||{}).txt)||{})[blockKey]||{};const txt=(man[dest]||'').toLowerCase();\n  return ITEMS.filter(it=>it.b===blockKey&&c.o&&c.o[it.n]&&((c.d&&c.d[it.n])||'dt')===dest).map(it=>c.o[it.n]).filter(t=>!txt.includes(t.toLowerCase()))}\nfunction gaps(S,obra,per){const g=[];const c=S.checks[obra+'|'+per];const sc=score(S,obra,per);\n  if(!c||sc.ev===0){g.push('Sin controles cargados');return g}\n  if(sc.carga<0.999)g.push('Falta cargar '+Math.round((1-sc.carga)*100)+'% de los controles');\n  const sin=ITEMS.filter(it=>(c.i[it.n]||[]).includes(0)&&!(c.o&&c.o[it.n]));if(sin.length)g.push(sin.length+' controles no cumplidos sin observación');\n  const inf=S.inf[obra+'|'+per]||{};const hasTxt=Object.values(inf.txt||{}).some(t=>(t.dt||'').trim()||(t.obra||'').trim())||Object.keys(c.o||{}).length>0;\n  if(!hasTxt)g.push('Informe del mes vacío');\n  const miss=IND.filter(([k])=>indVal(S,obra,per,k).dt==null);if(miss.length)g.push('Indicadores sin cargar: '+miss.map(m=>m[1].split(' ')[0].toLowerCase()).join(', '));\n  const rt=indVal(S,obra,per,'retrabajos');if(rt.dt>0&&!rt.resp)g.push('Retrabajos sin responsable');\n  const ab=S.desvios.filter(d=>d.obra===obra&&d.estado!=='cerrado');const sp=ab.filter(d=>!d.fechaPA||!d.resp).length;if(sp)g.push(sp+' desvíos abiertos sin fecha de plan o responsable');\n  return g}\n//#LOGIC-END\n\nlet S=defaultState(),db=null,dl=null,saveT=null,dbReady=false,lastAt=0;\nconst ui={tab:'tablero',per:'',obra:'MZ',open:null,form:null,fDes:{obra:'',estado:'',tipo:''},fCom:{obra:'',per:''},inf:false,imp:null,msg:''};\nconst esc=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\nconst pc=p=>p==null?'–':Math.round(p*100)+'%';\nconst fd=s=>s?s.slice(8,10)+'/'+s.slice(5,7):'–';\nconst money=n=>n==null?'–':'$ '+Math.round(n).toLocaleString('es-AR');\nconst obraN=id=>(S.obras.find(o=>o.id===id)||{nombre:id}).nombre;\nconst dtN=id=>(S.dts.find(d=>d.id===id)||{nombre:id}).nombre;\nconst SL={good:'Conforme',warn:'En alerta',bad:'No conforme',na:'Sin datos'};\nconst pill=(s,t)=>`<span class=\"pill ${s}\">${esc(t||SL[s])}</span>`;\nconst activas=()=>S.obras.filter(o=>o.activa);\nconst monthsWithData=()=>[...new Set(Object.keys(S.checks).map(k=>k.split('|')[1]))].sort();\n\nfunction setStatus(k){const el=document.getElementById('save');el.className='save '+k;el.querySelector('span').textContent={ok:'Guardado',saving:'Guardando…',err:'No se pudo guardar',local:'Guardado solo en este navegador',load:'Cargando'}[k]||''}\nfunction persist(){setStatus('saving');clearTimeout(saveT);saveT=setTimeout(async()=>{saveT=null;const json=JSON.stringify(S);try{localStorage.setItem('co_state',json)}catch(e){}\n  if(db){if(!dbReady){setStatus('err');return}try{const at=Date.now();lastAt=at;await db.doc('app/state').set({json,at});setStatus('ok')}catch(e){setStatus('err')}}else setStatus('local')},500)}\nfunction keep(){const y=scrollY;render();scrollTo(0,y)}\n\n/* ---------- Tablero ---------- */\nfunction spark(vals){const pts=vals.map((v,i)=>v==null?null:[i,v]).filter(Boolean);if(pts.length<1)return '<span class=\"dim\">–</span>';\n  const w=84,h=26,n=Math.max(vals.length-1,1);const xy=pts.map(([i,v])=>[4+(w-8)*i/n,h-4-(h-8)*v]);\n  const pl=xy.length>1?`<polyline points=\"${xy.map(p=>p.join(',')).join(' ')}\" fill=\"none\" stroke=\"var(--accent)\" stroke-width=\"2\" stroke-linejoin=\"round\"/>`:'';\n  const last=xy[xy.length-1];return `<svg width=\"${w}\" height=\"${h}\" viewBox=\"0 0 ${w} ${h}\" role=\"img\" aria-label=\"Evolución semanal\"><line x1=\"4\" x2=\"${w-4}\" y1=\"${h-4-(h-8)*S.cfg.meta}\" y2=\"${h-4-(h-8)*S.cfg.meta}\" stroke=\"var(--line)\" stroke-dasharray=\"2 2\"/>${pl}<circle cx=\"${last[0]}\" cy=\"${last[1]}\" r=\"3\" fill=\"var(--accent)\" stroke=\"var(--card)\" stroke-width=\"2\"/></svg>`}\nfunction bar(p){const s=stat(S,p);return `<div class=\"cellp\"><div class=\"bar\" title=\"Meta ${pc(S.cfg.meta)}\"><i class=\"${s}\" style=\"width:${p==null?0:Math.round(p*100)}%\"></i><b style=\"left:${S.cfg.meta*100}%\"></b></div><span class=\"p\">${pc(p)}</span></div>`}\nfunction weakest(sc){let m=null;BLOCKS.forEach(([k,n])=>{const p=sc.bl[k].pct;if(p!=null&&(!m||p<m.p))m={p,n}});return m?`${m.n} ${pc(m.p)}`:'–'}\nfunction viewTablero(){\n  const per=ui.per,os=activas();const rows=os.map(o=>({o,sc:score(S,o.id,per),ds:S.desvios.filter(d=>d.obra===o.id&&d.estado!=='cerrado')}));\n  const withData=rows.filter(r=>r.sc.pct!=null);\n  if(!withData.length&&!S.desvios.length)return `<div class=\"empty\">No hay datos cargados para ${esc(per)}. Cargá la primera semana en la pestaña <b>Carga semanal</b> y el tablero se completa solo.</div>`;\n  const avgP=avg(withData.map(r=>r.sc.pct));const bajo=withData.filter(r=>r.sc.pct<S.cfg.meta).length;\n  const ab=S.desvios.filter(d=>d.estado!=='cerrado'&&activas().some(o=>o.id===d.obra));const ve=ab.filter(vencido);\n  const cm=compraMes(null);\n  rows.sort((a,b)=>(a.sc.pct??2)-(b.sc.pct??2));\n  let h=`<div class=\"stats\">\n   <div class=\"stat\"><div class=\"k\">Conformidad media</div><div class=\"v\">${pc(avgP)}</div><div class=\"d\">Meta ${pc(S.cfg.meta)} · ${withData.length} de ${os.length} obras con datos</div></div>\n   <div class=\"stat\"><div class=\"k\">Obras bajo la meta</div><div class=\"v\">${bajo}</div><div class=\"d\">${withData.length?withData.filter(r=>r.sc.pct<S.cfg.alerta).length+' en no conforme':'Sin datos en el período'}</div></div>\n   <div class=\"stat\"><div class=\"k\">Desvíos abiertos</div><div class=\"v\">${ab.length}</div><div class=\"d\">${ve.length} con plan de acción vencido</div></div>\n   <div class=\"stat\"><div class=\"k\">Compras · exactitud</div><div class=\"v\">${pc(cm.ex)}</div><div class=\"d\">${cm.n?`${cm.n} req. · ciclo medio ${cm.ciclo==null?'–':cm.ciclo.toFixed(1)+' días'} · ${esc(cm.label)}`:'Sin requerimientos cargados'}</div></div></div>`;\n  h+=`<section class=\"blk\"><h2>Obras</h2><p class=\"sub\">De la más baja a la más alta. La marca vertical es la meta. Tocá una fila para cargar o corregir la obra.</p><div class=\"panel scroll\"><table style=\"min-width:820px\"><thead><tr><th>Obra</th><th>DT</th><th>Conformidad</th><th>Semanas</th><th>Carga</th><th>Bloque más bajo</th><th class=\"num\">Desv.</th><th class=\"num\">Venc.</th><th>Estado</th></tr></thead><tbody>`;\n  rows.forEach(({o,sc,ds})=>{h+=`<tr class=\"click\" data-act=\"goobra\" data-id=\"${esc(o.id)}\"><td><div class=\"name\">${esc(o.nombre)}</div><div class=\"tag\">${esc(o.id)}</div></td><td>${o.dts.map(dtN).map(esc).join('<br>')||'–'}</td><td>${bar(sc.pct)}</td><td>${spark(sc.wk)}</td><td class=\"tag\">${pc(sc.carga)}</td><td class=\"dim\">${esc(weakest(sc))}</td><td class=\"num\">${ds.length}</td><td class=\"num\">${ds.filter(vencido).length||'–'}</td><td>${pill(stat(S,sc.pct))}</td></tr>`});\n  h+=`</tbody></table></div></section>`;\n  // heatmap + desvíos\n  h+=`<div class=\"two\"><section><h2>Mapa por bloque</h2><p class=\"sub\">% de controles cumplidos en el mes.</p><div class=\"panel scroll\"><div class=\"heat\"><div class=\"h\"></div>${BLOCKS.map(b=>`<div class=\"h\">${esc(b[1].slice(0,5))}.</div>`).join('')}`;\n  rows.forEach(({o,sc})=>{h+=`<div class=\"o\">${esc(o.id)}</div>`+BLOCKS.map(([k])=>{const p=sc.bl[k].pct;return `<div class=\"c ${stat(S,p)}\">${p==null?'–':Math.round(p*100)}</div>`}).join('')});\n  h+=`</div></div></section><section><h2>Desvíos abiertos por tipo</h2><p class=\"sub\">Rojo: con plan de acción vencido.</p><div class=\"panel\"><div class=\"hbars\">`;\n  const mx=Math.max(1,...TIPOS.map(t=>ab.filter(d=>d.tipo===t).length));\n  TIPOS.forEach(t=>{const l=ab.filter(d=>d.tipo===t);const v=l.filter(vencido).length;h+=`<div class=\"hb\"><span>${esc(t)}</span><div class=\"t\"><i style=\"width:${l.length/mx*100}%\"></i><i class=\"o\" style=\"width:${v/mx*100}%\"></i></div><span class=\"tag\">${l.length}</span></div>`});\n  h+=`</div></div></section></div>`;\n  // vencidos\n  const crit=ab.filter(d=>vencido(d)||d.prio==='urgente'||d.prio==='crítico').sort((a,b)=>(a.fechaPA||'9').localeCompare(b.fechaPA||'9'));\n  h+=`<section class=\"blk\"><h2>Para resolver primero</h2><p class=\"sub\">Desvíos abiertos con plan vencido o prioridad urgente/crítica.</p><div class=\"panel\"><div class=\"list\">`+(crit.length?crit.slice(0,8).map(d=>`<div class=\"li\"><div class=\"row\"><span class=\"name\">${esc(d.obra)}</span><span>${esc(d.evento)}</span>${vencido(d)?pill('bad','Vencido '+fd(d.fechaPA)):''}${pill(d.prio==='urgente'||d.prio==='crítico'?'bad':'acc',d.prio||'normal')}</div><div class=\"dim\">${esc(d.plan||'Sin plan de acción')}${d.resp?' · Resp. '+esc(d.resp):''}</div></div>`).join(''):'<div class=\"dim\">Nada vencido ni urgente.</div>')+`</div></div></section>`;\n  const gp=os.map(o=>({o,g:gaps(S,o.id,per)})).filter(x=>x.g.length);\n  h+=`<section class=\"blk\"><h2>Qué falta completar</h2><p class=\"sub\">Revisión automática de ${esc(per)}: datos que conviene cargar para que los indicadores sean confiables. Tocá una obra para ir a cargarla.</p><div class=\"panel\"><div class=\"list\">`+(gp.length?gp.map(x=>`<div class=\"li\" style=\"cursor:pointer\" data-act=\"goobra\" data-id=\"${esc(x.o.id)}\"><span class=\"name\">${esc(x.o.nombre)}</span><div class=\"row\">${x.g.map(t=>`<span class=\"pill warn\">${esc(t)}</span>`).join('')}</div></div>`).join(''):'<div class=\"dim\">Todo completo.</div>')+`</div></div></section>`;\n  // DT\n  h+=`<section class=\"blk\"><h2>Desempeño de los DT</h2><p class=\"sub\">Promedio de las obras que dirige cada DT en ${esc(per)}. Carletto lo comparten dos DT: el resultado de la obra cuenta para ambos.</p><div class=\"panel scroll\"><table style=\"min-width:900px\"><thead><tr><th>DT</th><th>Obras</th><th>Conformidad</th><th class=\"num\">vs mes ant.</th><th>Carga</th><th class=\"num\" title=\"Desvíos detectados anticipadamente\">Antic.</th><th class=\"num\" title=\"Pendientes cerrados\">Pend.</th><th class=\"num\">Retrab.</th><th class=\"num\">Paral.</th><th class=\"num\">Desv. abiertos</th><th>Estado</th><th>Observación</th></tr></thead><tbody>`;\n  const dts=S.dts.map(d=>({d,s:dtStats(S,d.id,per)})).sort((a,b)=>(a.s.pct??2)-(b.s.pct??2));\n  dts.forEach(({d,s})=>{const dl=(s.pct!=null&&s.prev!=null)?Math.round((s.pct-s.prev)*100):null;\n    h+=`<tr class=\"click\" data-act=\"dtopen\" data-id=\"${esc(d.id)}\"><td class=\"name\">${esc(d.nombre)}</td><td class=\"tag\">${s.os.map(o=>esc(o.id)).join(' · ')||'–'}</td><td>${bar(s.pct)}</td><td class=\"num\">${dl==null?'–':(dl>0?'+':'')+dl+' pp'}</td><td class=\"tag\">${pc(s.carga)}</td>${IND.map(([k])=>`<td class=\"num\">${s.hasInd?`<span class=\"${s.ver[k]==='good'?'num-good':s.ver[k]==='bad'?'num-bad':''}\">${s.ind[k]}</span>`:'–'}</td>`).join('')}<td class=\"num\">${s.abiertos}${s.venc?` <span class=\"pill bad\">${s.venc} venc.</span>`:''}</td><td>${pill(stat(S,s.pct))}</td><td style=\"min-width:220px\"><textarea rows=\"2\" id=\"od_${esc(d.id)}\" data-act=\"obsdt\" data-id=\"${esc(d.id)}\" placeholder=\"Observación del DT\" style=\"width:100%\">${esc((S.obsDT[per]||{})[d.id]||'')}</textarea></td></tr>`;\n    if(ui.open===d.id)h+=`<tr class=\"det\"><td colspan=\"12\">${dtDetail(d,s,per)}</td></tr>`});\n  h+=`<tr><td colspan=\"2\" class=\"name\">Observaciones generales<div class=\"dim\">Para todos los DT</div></td><td colspan=\"10\"><textarea rows=\"2\" id=\"od__gral\" data-act=\"obsdt\" data-id=\"_gral\" placeholder=\"Observación general referida a todos los DT\" style=\"width:100%\">${esc((S.obsDT[per]||{})._gral||'')}</textarea></td></tr>`;\n  h+=`</tbody></table></div><p class=\"dim\">Verde o rojo en los indicadores: tendencia contra el mes anterior según el objetivo de cada uno.</p></section>`;\n  return h}\nfunction dtDetail(d,s,per){let h=`<div class=\"row\" style=\"margin-bottom:8px\">`+BLOCKS.map(([k,n])=>`<span class=\"pill ${stat(S,s.bl[k])}\">${esc(n)} ${pc(s.bl[k])}</span>`).join('')+`</div>`;\n  s.os.forEach(o=>{const ck=(S.checks[o.id+'|'+per]||{});const fails=ITEMS.filter(it=>(ck.i&&ck.i[it.n]||[]).includes(0));\n    h+=`<div class=\"name\" style=\"margin-top:6px\">${esc(o.nombre)}</div>`+(fails.length?`<ul style=\"margin:4px 0 6px;padding-left:18px\">`+fails.map(it=>`<li>${esc(it.t)}${ck.o&&ck.o[it.n]?` <span class=\"dim\">— ${esc(ck.o[it.n])}</span>`:''}</li>`).join('')+`</ul>`:`<div class=\"dim\">Sin incumplimientos registrados.</div>`)});\n  return h}\nfunction compraMes(per){let list=S.compras;let label='todos los períodos';\n  if(per){list=list.filter(c=>(c.fin||c.inicio||'').slice(0,7)===per);label=per}\n  else{const ms=[...new Set(S.compras.map(c=>(c.fin||c.inicio||'').slice(0,7)))].sort();const m=ms[ms.length-1];if(m){list=S.compras.filter(c=>(c.fin||c.inicio||'').slice(0,7)===m);label=m}}\n  const k=list.map(compra);return{n:list.length,ex:avg(k.map(x=>x.ex)),ciclo:avg(k.map(x=>x.ciclo)),ah:avg(k.map(x=>x.ah)),label}}\n\n/* ---------- Carga semanal ---------- */\nfunction viewCarga(){\n  const o=S.obras.find(x=>x.id===ui.obra)||activas()[0];const per=ui.per,W=weeksOf(per);const key=o.id+'|'+per;\n  const ck=(S.checks[key]||{i:{},o:{}});const sc=score(S,o.id,per);\n  let h=`<div class=\"sticky\"><div class=\"row\" style=\"justify-content:space-between\"><div class=\"row\"><label class=\"tag\">OBRA <select data-act=\"obra\" id=\"obraSel\">${activas().map(x=>`<option value=\"${esc(x.id)}\" ${x.id===o.id?'selected':''}>${esc(x.nombre)}</option>`).join('')}</select></label><span class=\"dim\">DT: ${o.dts.map(dtN).join(', ')||'–'}</span></div><div class=\"row\"><span class=\"stat\"><span class=\"v\" style=\"font-size:28px\">${pc(sc.pct)}</span></span>${pill(stat(S,sc.pct))}<span class=\"tag\">Cargado ${pc(sc.carga)}</span></div></div></div>`;\n  if(!W.length)return h+'<div class=\"empty\">Este mes no tiene lunes cargables.</div>';\n  h+=`<p class=\"sub\">Tocá una celda: vacío → ✓ cumple → ✗ no cumple → vacío. Las celdas apagadas no corresponden a esa semana según la frecuencia del control.</p><div class=\"panel scroll\"><table class=\"ck\"><thead><tr><th>Control</th><th>Frec.</th>${W.map((w,wi)=>`<th style=\"text-align:center\">S${w.n}<div class=\"tag\" style=\"text-transform:none\">${w.label}</div><button class=\"btn ghost sm\" data-act=\"colok\" data-w=\"${wi}\" title=\"Marca cumple en los controles vacíos de la semana\">Todo ✓</button></th>`).join('')}<th>Observación y a quién se refiere</th></tr></thead><tbody>`;\n  BLOCKS.forEach(([k,n])=>{const b=sc.bl[k];h+=`<tr class=\"bh\"><td colspan=\"${W.length+3}\">${esc(n)} <span class=\"tag\" style=\"margin-left:8px\">${pc(b.pct)} · peso ${Math.round(S.cfg.w[k]*100)}%</span></td></tr>`;\n    ITEMS.filter(it=>it.b===k).forEach(it=>{const row=ck.i[it.n]||[];h+=`<tr><td>${esc(it.t)}<div class=\"tag\">${esc(it.ins||'')}</div></td><td class=\"tag\">${esc((it.fr||'').slice(0,4))}</td>`+W.map((_,wi)=>{const v=row[wi];const on=appl(it,wi)||v===0||v===1;return `<td class=\"w\"><button class=\"cb ${v===1?'y':v===0?'n':''}\" data-act=\"cell\" data-n=\"${it.n}\" data-w=\"${wi}\" ${on?'':'disabled'} aria-label=\"${esc(it.t)} semana ${W[wi].n}\">${v===1?'✓':v===0?'✗':on?'·':'–'}</button></td>`}).join('')+`<td><div class=\"row\" style=\"flex-wrap:nowrap\"><select class=\"dest\" id=\"dest${it.n}\" data-act=\"odest\" data-n=\"${it.n}\" aria-label=\"Referido a\" title=\"¿La observación se refiere a la DT o a la obra/proyecto?\"><option value=\"dt\" ${((ck.d||{})[it.n]||'dt')==='dt'?'selected':''}>DT</option><option value=\"obra\" ${(ck.d||{})[it.n]==='obra'?'selected':''}>Obra</option></select><input class=\"obs\" type=\"text\" id=\"obs${it.n}\" data-act=\"obs\" data-n=\"${it.n}\" value=\"${esc((ck.o||{})[it.n]||'')}\" placeholder=\"Observación\"></div></td></tr>`})});\n  h+=`</tbody></table></div>`;\n  h+=`<section class=\"blk\" style=\"margin-top:24px\" id=\"informeBox\">${informeHTML(o,per)}</section>`;\n  return h}\nfunction informeHTML(o,per){const inf=(S.inf[o.id+'|'+per]||{txt:{}});\n  let h=`<h2>Informe del mes</h2><p class=\"sub\">Las observaciones de los controles se ubican solas según elijas DT u Obra en cada fila. Sumá observaciones adicionales en cada bloque. Los indicadores del mes se cargan en la pestaña Desvíos.</p><div class=\"panel\">`;\n  BLOCKS.forEach(([k,n])=>{const t=(inf.txt&&inf.txt[k])||{};\n    const col=(dest,lab)=>{const au=autoObs(S,o.id,per,k,dest);return `<div style=\"min-width:0\"><div class=\"tag\" style=\"text-transform:uppercase;letter-spacing:.05em\">${lab}</div>${au.length?`<ul class=\"auto\">${au.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}<textarea rows=\"2\" id=\"t${dest}_${esc(k)}\" data-act=\"txt\" data-b=\"${esc(k)}\" data-f=\"${dest}\" placeholder=\"Observación adicional\" style=\"width:100%\">${esc(t[dest]||'')}</textarea></div>`};\n    h+=`<div class=\"infrow\"><div class=\"name\">${esc(n)}</div>${col('dt','Referido a la DT')}${col('obra','Referido a la obra / proyecto')}</div>`});\n  return h+`</div>`}\n/* ---------- Desvíos ---------- */\nfunction viewDesvios(){\n  const f=ui.fDes;let list=S.desvios.filter(d=>(!f.obra||d.obra===f.obra)&&(!f.estado||d.estado===f.estado)&&(!f.tipo||d.tipo===f.tipo)).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));\n  const ab=S.desvios.filter(d=>d.estado!=='cerrado');\n  let h=`<div class=\"row\" style=\"justify-content:space-between;margin-bottom:10px\"><div><h2>Registro de desvíos</h2><p class=\"sub\" style=\"margin:0\">${ab.length} abiertos · ${ab.filter(vencido).length} vencidos · ${S.desvios.length} en total</p></div><button class=\"btn\" data-act=\"newdes\">+ Nuevo desvío</button></div>`;\n  if(ui.form&&ui.form.kind==='desvio')h+=formDesvio();\n  h+=`<div class=\"row\" style=\"margin-bottom:10px\"><select id=\"fdo\" data-act=\"fdes\" data-k=\"obra\"><option value=\"\">Todas las obras</option>${S.obras.map(o=>`<option value=\"${esc(o.id)}\" ${f.obra===o.id?'selected':''}>${esc(o.id)}</option>`).join('')}</select><select id=\"fde\" data-act=\"fdes\" data-k=\"estado\"><option value=\"\">Todos los estados</option>${ESTADOS.map(e=>`<option ${f.estado===e?'selected':''}>${e}</option>`).join('')}</select><select id=\"fdt\" data-act=\"fdes\" data-k=\"tipo\"><option value=\"\">Todos los tipos</option>${TIPOS.map(e=>`<option ${f.tipo===e?'selected':''}>${esc(e)}</option>`).join('')}</select></div>`;\n  h+=`<div class=\"panel scroll\"><table style=\"min-width:1100px\"><thead><tr><th>Fecha</th><th>Obra</th><th>Evento</th><th>Tipo</th><th class=\"num\">Días</th><th>Plan de acción</th><th>Fecha P.A.</th><th>Resp.</th><th title=\"¿El desvío genera retrabajo?\">Genera retrabajo</th><th title=\"¿Era evitable la paralización?\">Paralización evitable</th><th>Estado</th><th></th></tr></thead><tbody>`;\n  h+=list.length?list.map(d=>`<tr><td class=\"tag\">${fd(d.fecha)}</td><td class=\"name\">${esc(d.obra)}</td><td style=\"min-width:200px\">${esc(d.evento)}${d.prio&&d.prio!=='normal'?` ${pill(d.prio==='alta'?'warn':'bad',d.prio)}`:''}</td><td>${esc(d.tipo)}</td><td class=\"num\">${d.impDias==null?'<span class=\"dim\">estudio</span>':'+'+d.impDias}</td><td style=\"min-width:220px\" class=\"dim\">${esc(d.plan)}</td><td>${fd(d.fechaPA)}${vencido(d)?' '+pill('bad','venc.'):''}</td><td>${esc(d.resp)}</td><td>${tg(d,'retrab','Retrabajo')}</td><td>${tg(d,'paral','Paralización evitable')}</td><td><select data-act=\"destado\" data-id=\"${d.id}\" aria-label=\"Estado\">${ESTADOS.map(e=>`<option ${d.estado===e?'selected':''}>${e}</option>`).join('')}</select></td><td><button class=\"btn ghost sm\" data-act=\"editdes\" data-id=\"${d.id}\">Editar</button></td></tr>`).join(''):`<tr><td colspan=\"12\" class=\"dim\">No hay desvíos con estos filtros.</td></tr>`;\n  return h+`</tbody></table></div>`+indicadoresHTML()}\nconst tg=(d,f,n)=>`<button type=\"button\" class=\"tg ${d[f]||''}\" data-act=\"dflag\" data-id=\"${esc(d.id)}\" data-f=\"${f}\" aria-label=\"${n}: ${d[f]==='si'?'sí':d[f]==='no'?'no':'sin definir'}\" title=\"${n}. Tocá para cambiar: sin definir, Sí, No\">${d[f]==='si'?'Sí':d[f]==='no'?'No':'–'}</button>`;\nconst INDLAB={desvios:'Desvíos anticipados por DT (totales vs DT)',pendientes:'Pendientes cerrados',retrabajos:'Retrabajos (con responsable)',paralizaciones:'Paralizaciones evitables'};\nfunction indDyn(o,k,per){const v=indVal(S,o,per,k),q=indVal(S,o,prevPer(per),k);const vd=verdict(k,v.dt,q.dt);\n  const txt=vd==='good'?'Conforme':vd==='bad'?'No conforme':v.dt==null?'Sin datos':q.dt==null?'Sin mes anterior':'Sin variación';\n  return `<div class=\"row\" style=\"gap:8px\"><span class=\"tag\">Result. ${pc(v.res)}</span><span class=\"tag\">Ant. ${q.dt==null?'–':q.dt}</span>${pill(vd,txt)}</div>`}\nfunction indicadoresHTML(){const per=ui.per;\n  let h=`<section class=\"blk\" style=\"margin-top:30px\"><h2>Indicadores de gestión · ${esc(per)}</h2><p class=\"sub\">Escribí cuántos le corresponden a la DT y cuántos hay en total. La conformidad compara la DT contra el mes anterior: desvíos anticipados y pendientes cerrados deben subir; retrabajos y paralizaciones deben bajar. Desvíos anticipados: si dejás vacío DT, se toma del registro (los marcados «Detectó: DT»). Retrabajos y paralizaciones evitables: en cuanto marcás algún desvío del mes con los botones del registro, se calculan solos y el campo queda bloqueado.</p><div class=\"panel scroll\"><table class=\"ig\" style=\"min-width:860px\"><thead><tr><th>Obra</th><th>Indicador</th><th class=\"num\">DT</th><th class=\"num\">Totales</th><th>Evaluación</th><th>Responsable / observación</th></tr></thead><tbody>`;\n  activas().forEach(o=>{IND.forEach(([k],idx)=>{const e=(((S.inf[o.id+'|'+per]||{}).ind)||{})[k]||{};const v=indVal(S,o.id,per,k);const f=k==='retrabajos'?'resp':'obs';const lock=(k==='retrabajos'||k==='paralizaciones')&&v.auto;\n    h+=`<tr class=\"${idx===0?'og':''}\"><td class=\"name\">${idx===0?esc(o.id):''}</td><td>${esc(INDLAB[k])}<div class=\"tag\">${OBJ[k]==='asc'?'Objetivo ascendente ▲':'Objetivo descendente ▼'}</div></td>\n    <td class=\"num\"><input type=\"number\" min=\"0\" id=\"idt_${esc(o.id)}_${k}\" data-act=\"indn\" data-o=\"${esc(o.id)}\" data-k=\"${k}\" data-f=\"dt\" value=\"${lock?v.dt:(typeof e.dt==='number'?e.dt:'')}\" placeholder=\"${v.auto&&v.dt!=null?v.dt:''}\" ${lock?'disabled title=\"Calculado desde los botones del registro de desvíos\"':''}></td>\n    <td class=\"num\"><input type=\"number\" min=\"0\" id=\"itt_${esc(o.id)}_${k}\" data-act=\"indn\" data-o=\"${esc(o.id)}\" data-k=\"${k}\" data-f=\"total\" value=\"${typeof e.total==='number'?e.total:''}\" placeholder=\"${v.auto&&v.total!=null?v.total:''}\"></td>\n    <td id=\"idyn_${esc(o.id)}_${k}\">${indDyn(o.id,k,per)}</td>\n    <td><input type=\"text\" id=\"ixt_${esc(o.id)}_${k}\" data-act=\"indt\" data-o=\"${esc(o.id)}\" data-k=\"${k}\" data-f=\"${f}\" value=\"${esc(e[f]||'')}\" placeholder=\"${k==='retrabajos'?(v.resp&&!e.resp?v.resp:'Responsable del retrabajo'):'Observación'}\"></td></tr>`})});\n  return h+`</tbody></table></div></section>`}\nconst opt=(arr,v)=>arr.map(a=>`<option ${a===v?'selected':''}>${esc(a)}</option>`).join('');\nconst flagOpt=v=>`<option value=\"\" ${!v?'selected':''}>Sin definir</option><option value=\"si\" ${v==='si'?'selected':''}>Sí</option><option value=\"no\" ${v==='no'?'selected':''}>No</option>`;\nfunction formDesvio(){const d=ui.form.id?S.desvios.find(x=>x.id===ui.form.id):{fecha:isoToday(),obra:ui.fDes.obra||activas()[0].id,estado:'abierto',prio:'normal',tipo:TIPOS[0],detecta:'DT'};\n  return `<form class=\"panel\" id=\"fdesForm\" style=\"margin-bottom:14px\"><b>${ui.form.id?'Editar desvío':'Nuevo desvío'}</b><div class=\"grid-f\">\n  <label>Fecha<input type=\"date\" name=\"fecha\" value=\"${esc(d.fecha)}\" required></label>\n  <label>Obra<select name=\"obra\">${S.obras.map(o=>`<option value=\"${esc(o.id)}\" ${o.id===d.obra?'selected':''}>${esc(o.nombre)}</option>`).join('')}</select></label>\n  <label>Tipo<select name=\"tipo\">${opt(TIPOS,d.tipo)}</select></label>\n  <label>Detectó<select name=\"detecta\">${opt(['DT','CO','Otro'],d.detecta||'')}</select></label>\n  <label>Impacto en plazo (días)<input type=\"number\" name=\"impDias\" min=\"0\" value=\"${d.impDias==null?'':d.impDias}\" placeholder=\"vacío = en estudio\"></label>\n  <label>Prioridad<select name=\"prio\">${opt(PRIOS,d.prio||'normal')}</select></label>\n  <label class=\"wide\">Evento<input type=\"text\" name=\"evento\" value=\"${esc(d.evento||'')}\" required></label>\n  <label class=\"wide\">Plan de acción<textarea name=\"plan\" rows=\"2\">${esc(d.plan||'')}</textarea></label>\n  <label>Fecha del plan<input type=\"date\" name=\"fechaPA\" value=\"${esc(d.fechaPA||'')}\"></label>\n  <label>Responsable<input type=\"text\" name=\"resp\" value=\"${esc(d.resp||'')}\"></label>\n  <label>Estado<select name=\"estado\">${opt(ESTADOS,d.estado)}</select></label>\n  <label>¿Genera retrabajo?<select name=\"retrab\">${flagOpt(d.retrab)}</select></label>\n  <label>¿Paralización evitable?<select name=\"paral\">${flagOpt(d.paral)}</select></label></div>\n  <div class=\"row\"><button class=\"btn\" type=\"submit\">Guardar</button><button class=\"btn ghost\" type=\"button\" data-act=\"cancelform\">Cancelar</button>${ui.form.id?`<button class=\"btn danger\" type=\"button\" data-act=\"${ui.form.del?'deldes2':'deldes'}\">${ui.form.del?'Confirmar: eliminar':'Eliminar'}</button>`:''}</div></form>`}\n\n/* ---------- Compras ---------- */\nfunction viewCompras(){\n  const f=ui.fCom;let list=S.compras.filter(c=>(!f.obra||c.obra===f.obra)&&(!f.per||(c.fin||c.inicio||'').slice(0,7)===f.per)).sort((a,b)=>(b.inicio||'').localeCompare(a.inicio||''));\n  const ks=list.map(compra);const ex=avg(ks.map(k=>k.ex)),ci=avg(ks.map(k=>k.ciclo)),ah=avg(ks.map(k=>k.ah));\n  const meses=[...new Set(S.compras.map(c=>(c.fin||c.inicio||'').slice(0,7)))].sort();\n  let h=`<div class=\"row\" style=\"justify-content:space-between;margin-bottom:10px\"><div><h2>Compras · indicadores</h2><p class=\"sub\" style=\"margin:0\">Tiempo de ciclo, exactitud del pedido y ahorro. La meta de exactitud del informe de marzo es 95%.</p></div><button class=\"btn\" data-act=\"newcom\">+ Nuevo requerimiento</button></div>`;\n  if(ui.form&&ui.form.kind==='compra')h+=formCompra();\n  h+=`<div class=\"stats\"><div class=\"stat\"><div class=\"k\">Requerimientos</div><div class=\"v\">${list.length}</div><div class=\"d\">${list.filter(c=>!c.fin).length} en curso</div></div><div class=\"stat\"><div class=\"k\">Ciclo medio</div><div class=\"v\">${ci==null?'–':ci.toFixed(1)}</div><div class=\"d\">días, solo los cerrados</div></div><div class=\"stat\"><div class=\"k\">Exactitud</div><div class=\"v\">${pc(ex)}</div><div class=\"d\">entregado / pedido</div></div><div class=\"stat\"><div class=\"k\">Ahorro medio</div><div class=\"v\">${pc(ah)}</div><div class=\"d\">precio inicial vs compra</div></div></div>`;\n  h+=`<div class=\"row\" style=\"margin-bottom:10px\"><select id=\"fco\" data-act=\"fcom\" data-k=\"obra\"><option value=\"\">Todas las obras</option>${S.obras.map(o=>`<option value=\"${esc(o.id)}\" ${f.obra===o.id?'selected':''}>${esc(o.id)}</option>`).join('')}</select><select id=\"fcp\" data-act=\"fcom\" data-k=\"per\"><option value=\"\">Todos los meses</option>${meses.map(m=>`<option ${f.per===m?'selected':''}>${m}</option>`).join('')}</select></div>`;\n  h+=`<div class=\"panel scroll\"><table style=\"min-width:900px\"><thead><tr><th>Obra</th><th>Req.</th><th>Descripción</th><th>Inicio</th><th>Fin</th><th class=\"num\">Ciclo</th><th class=\"num\">Ped.</th><th class=\"num\">Entr.</th><th class=\"num\">Exactitud</th><th class=\"num\">Ahorro</th><th></th></tr></thead><tbody>`;\n  h+=list.length?list.map(c=>{const k=compra(c);return `<tr><td class=\"name\">${esc(c.obra)}</td><td class=\"tag\">${esc(c.req)}</td><td style=\"min-width:180px\">${esc(c.desc)}${c.obs?`<div class=\"dim\">${esc(c.obs)}</div>`:''}</td><td class=\"tag\">${fd(c.inicio)}</td><td class=\"tag\">${c.fin?fd(c.fin):pill('acc','en curso')}</td><td class=\"num\">${k.ciclo!=null?k.ciclo+' d':k.transc!=null?`<span class=\"dim\">${k.transc} d…</span>`:'–'}</td><td class=\"num\">${c.pedidos??'–'}</td><td class=\"num\">${c.entregados??'–'}</td><td class=\"num\">${k.ex==null?'–':`<span class=\"${k.ex<.95?'pill warn':'pill good'}\">${pc(k.ex)}</span>`}</td><td class=\"num\">${k.ah==null?'–':pc(k.ah)}${c.pIni&&c.pCompra?`<div class=\"dim\">${money(c.pIni-c.pCompra)}</div>`:''}</td><td><button class=\"btn ghost sm\" data-act=\"editcom\" data-id=\"${c.id}\">Editar</button></td></tr>`}).join(''):`<tr><td colspan=\"11\" class=\"dim\">No hay requerimientos con estos filtros.</td></tr>`;\n  return h+`</tbody></table></div>`}\nfunction formCompra(){const c=ui.form.id?S.compras.find(x=>x.id===ui.form.id):{obra:ui.fCom.obra||activas()[0].id,inicio:isoToday()};\n  return `<form class=\"panel\" id=\"fcomForm\" style=\"margin-bottom:14px\"><b>${ui.form.id?'Editar requerimiento':'Nuevo requerimiento'}</b><div class=\"grid-f\">\n  <label>Obra<select name=\"obra\">${S.obras.map(o=>`<option value=\"${esc(o.id)}\" ${o.id===c.obra?'selected':''}>${esc(o.nombre)}</option>`).join('')}</select></label>\n  <label>Requerimiento<input type=\"text\" name=\"req\" value=\"${esc(c.req||'')}\" placeholder=\"REQ Nº 018\" required></label>\n  <label class=\"wide\">Descripción<input type=\"text\" name=\"desc\" value=\"${esc(c.desc||'')}\" required></label>\n  <label>Inicio<input type=\"date\" name=\"inicio\" value=\"${esc(c.inicio||'')}\" required></label>\n  <label>Fin (llegada)<input type=\"date\" name=\"fin\" value=\"${esc(c.fin||'')}\"></label>\n  <label>Cant. pedidos<input type=\"number\" name=\"pedidos\" min=\"0\" value=\"${c.pedidos??''}\"></label>\n  <label>Cant. entregados<input type=\"number\" name=\"entregados\" min=\"0\" value=\"${c.entregados??''}\"></label>\n  <label>Presupuesto inicial ($)<input type=\"number\" name=\"pIni\" min=\"0\" value=\"${c.pIni??''}\"></label>\n  <label>Compra final ($)<input type=\"number\" name=\"pCompra\" min=\"0\" value=\"${c.pCompra??''}\"></label>\n  <label class=\"wide\">Observación<textarea name=\"obs\" rows=\"2\">${esc(c.obs||'')}</textarea></label></div>\n  <div class=\"row\"><button class=\"btn\" type=\"submit\">Guardar</button><button class=\"btn ghost\" type=\"button\" data-act=\"cancelform\">Cancelar</button>${ui.form.id?`<button class=\"btn danger\" type=\"button\" data-act=\"${ui.form.del?'delcom2':'delcom'}\">${ui.form.del?'Confirmar: eliminar':'Eliminar'}</button>`:''}</div></form>`}\n\n/* ---------- Obras, DT y parámetros ---------- */\nfunction viewConfig(){\n  let h=`<h2>Obras y DT</h2><p class=\"sub\">Asigná los DT a cada obra y marcá cuáles están activas. Solo las activas entran al tablero.</p><div class=\"panel scroll\"><table style=\"min-width:640px\"><thead><tr><th>Código</th><th>Obra</th><th>DT a cargo</th><th>Activa</th></tr></thead><tbody>`;\n  S.obras.forEach(o=>{h+=`<tr><td class=\"tag\">${esc(o.id)}</td><td><input type=\"text\" id=\"on_${esc(o.id)}\" data-act=\"onombre\" data-id=\"${esc(o.id)}\" value=\"${esc(o.nombre)}\" style=\"width:100%;min-width:200px\"></td><td><div class=\"row\">${S.dts.map(d=>`<label class=\"row\" style=\"gap:4px\"><input type=\"checkbox\" data-act=\"odt\" data-id=\"${esc(o.id)}\" data-dt=\"${d.id}\" ${o.dts.includes(d.id)?'checked':''}>${esc(d.nombre)}</label>`).join('')}</div></td><td><input type=\"checkbox\" data-act=\"oact\" data-id=\"${esc(o.id)}\" ${o.activa?'checked':''} aria-label=\"Activa\"></td></tr>`});\n  h+=`</tbody></table></div><div class=\"row\" style=\"margin-top:10px\"><input type=\"text\" id=\"newObraId\" placeholder=\"Código (ej. NV)\" style=\"width:120px\"><input type=\"text\" id=\"newObraN\" placeholder=\"Nombre de la obra\"><button class=\"btn\" data-act=\"addobra\">Agregar obra</button></div>`;\n  h+=`<div class=\"row\" style=\"margin-top:14px\"><input type=\"text\" id=\"newDt\" placeholder=\"Nombre del DT\"><button class=\"btn\" data-act=\"adddt\">Agregar DT</button></div>`;\n  h+=`<section class=\"blk\" style=\"margin-top:30px\"><h2>Parámetros de evaluación</h2><p class=\"sub\">Los pesos salen de tus planillas. Las metas son una propuesta mía: ajustalas a tu criterio.</p><div class=\"panel\"><div class=\"grid-f\">`+BLOCKS.map(([k,n])=>`<label>Peso ${esc(n)} (%)<input type=\"number\" min=\"0\" max=\"100\" id=\"w_${esc(k)}\" data-act=\"peso\" data-k=\"${esc(k)}\" value=\"${Math.round(S.cfg.w[k]*100)}\"></label>`).join('')+`<label>Meta de conformidad (%)<input type=\"number\" min=\"0\" max=\"100\" id=\"meta\" data-act=\"meta\" data-k=\"meta\" value=\"${Math.round(S.cfg.meta*100)}\"></label><label>Piso de alerta (%)<input type=\"number\" min=\"0\" max=\"100\" id=\"alerta\" data-act=\"meta\" data-k=\"alerta\" value=\"${Math.round(S.cfg.alerta*100)}\"></label></div><p class=\"dim\">Conforme desde la meta, en alerta desde el piso, no conforme por debajo. Los pesos no necesitan sumar 100.</p></div></section>`;\n  h+=`<section class=\"blk\"><h2>Copia de seguridad</h2><p class=\"sub\">Descargá todos los datos o restaurá una copia anterior.</p><div class=\"row\"><button class=\"btn\" data-act=\"export\">Descargar copia (.json)</button><label class=\"btn ghost\" style=\"cursor:pointer\">Restaurar desde archivo<input type=\"file\" id=\"impFile\" accept=\".json,application/json\" data-act=\"impfile\" hidden></label></div><div class=\"dim\" id=\"impMsg\">${esc(ui.msg)}</div></section>`;\n  return h}\n\n/* ---------- shell ---------- */\nconst TABS=[['tablero','Tablero'],['carga','Carga semanal'],['desvios','Desvíos'],['compras','Compras'],['config','Obras y DT']];\nfunction render(){\n  document.getElementById('tabs').innerHTML=TABS.map(([k,n])=>`<button data-act=\"tab\" data-k=\"${k}\" ${ui.tab===k?'aria-current=\"true\"':''}>${n}</button>`).join('');\n  document.getElementById('per').value=ui.per;\n  document.getElementById('sum').textContent=`${activas().length} obras activas · ${S.dts.length} DT`;\n  const v={tablero:viewTablero,carga:viewCarga,desvios:viewDesvios,compras:viewCompras,config:viewConfig}[ui.tab];\n  document.getElementById('app').innerHTML=v()}\nfunction refInf(){const o=S.obras.find(x=>x.id===ui.obra);const b=document.getElementById('informeBox');if(b&&o)b.innerHTML=informeHTML(o,ui.per)}\nconst uid=()=>Math.random().toString(36).slice(2,9);\nfunction ensure(key){return S.checks[key]||(S.checks[key]={i:{},o:{}})}\nfunction ensureInf(key){const x=S.inf[key]||(S.inf[key]={txt:{},ind:{}});x.txt=x.txt||{};x.ind=x.ind||{};return x}\nconst num=v=>v===''||v==null?null:Number(v);\ndocument.addEventListener('click',async e=>{\n  const t=e.target.closest('[data-act]');if(!t||t.tagName==='SELECT'||t.tagName==='INPUT'&&t.type!=='checkbox')return;const a=t.dataset.act;\n  if(a==='tab'){ui.tab=t.dataset.k;ui.form=null;try{history.replaceState(null,'','#'+ui.tab)}catch(x){}render();scrollTo(0,0)}\n  else if(a==='goobra'){ui.obra=t.dataset.id;ui.tab='carga';render();scrollTo(0,0)}\n  else if(a==='dtopen'){ui.open=ui.open===t.dataset.id?null:t.dataset.id;keep()}\n  else if(a==='cell'){const k=ui.obra+'|'+ui.per;const c=ensure(k);const n=t.dataset.n,w=+t.dataset.w;const row=c.i[n]||(c.i[n]=[]);while(row.length<=w)row.push(null);const v=row[w];row[w]=v==null?1:v===1?0:null;persist();keep()}\n  else if(a==='colok'){const k=ui.obra+'|'+ui.per;const c=ensure(k);const w=+t.dataset.w;ITEMS.forEach(it=>{if(!appl(it,w))return;const row=c.i[it.n]||(c.i[it.n]=[]);while(row.length<=w)row.push(null);if(row[w]==null)row[w]=1});persist();keep()}\n  else if(a==='dflag'){const d=S.desvios.find(x=>x.id===t.dataset.id);if(d){const f=t.dataset.f,c=d[f]||'';d[f]=c===''?'si':c==='si'?'no':'';persist();keep()}}\n  else if(a==='newdes'){ui.form={kind:'desvio',id:null};render()}\n  else if(a==='editdes'){ui.form={kind:'desvio',id:t.dataset.id};render();scrollTo(0,0)}\n  else if(a==='newcom'){ui.form={kind:'compra',id:null};render()}\n  else if(a==='editcom'){ui.form={kind:'compra',id:t.dataset.id};render();scrollTo(0,0)}\n  else if(a==='cancelform'){ui.form=null;render()}\n  else if(a==='deldes'||a==='delcom'){ui.form.del=true;render()}\n  else if(a==='deldes2'){S.desvios=S.desvios.filter(d=>d.id!==ui.form.id);ui.form=null;persist();render()}\n  else if(a==='delcom2'){S.compras=S.compras.filter(d=>d.id!==ui.form.id);ui.form=null;persist();render()}\n  else if(a==='addobra'){const id=document.getElementById('newObraId').value.trim(),n=document.getElementById('newObraN').value.trim();if(id&&n&&!S.obras.some(o=>o.id===id)){S.obras.push({id,nombre:n,dts:[],activa:true});persist();render()}}\n  else if(a==='adddt'){const n=document.getElementById('newDt').value.trim();if(n){S.dts.push({id:'dt'+uid(),nombre:n});persist();render()}}\n  else if(a==='odt'){const o=S.obras.find(x=>x.id===t.dataset.id);const id=t.dataset.dt;o.dts=t.checked?[...new Set([...o.dts,id])]:o.dts.filter(x=>x!==id);persist()}\n  else if(a==='oact'){S.obras.find(x=>x.id===t.dataset.id).activa=t.checked;persist();document.getElementById('sum').textContent=`${activas().length} obras activas · ${S.dts.length} DT`}\n  else if(a==='export'){const json=JSON.stringify(S,null,1);let ok=false;try{if(dl)await dl.save({filename:'coordinacion-obras-'+isoToday()+'.json',data:json});ok=!!dl}catch(x){}\n    if(!ok){try{await navigator.clipboard.writeText(json);ui.msg='No se pudo descargar; el contenido quedó copiado al portapapeles.'}catch(x){ui.msg='No se pudo descargar ni copiar.'}document.getElementById('impMsg').textContent=ui.msg}}\n});\ndocument.addEventListener('change',e=>{\n  const t=e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,k=ui.obra+'|'+ui.per;\n  if(a==='per'){if(t.value){ui.per=t.value;render()}}\n  else if(a==='obra'){ui.obra=t.value;render()}\n  else if(a==='obs'){const c=ensure(k);c.o=c.o||{};if(t.value.trim())c.o[t.dataset.n]=t.value.trim();else delete c.o[t.dataset.n];persist();refInf()}\n  else if(a==='odest'){const c=ensure(k);c.d=c.d||{};c.d[t.dataset.n]=t.value;persist();refInf()}\n  else if(a==='obsdt'){const o=S.obsDT[ui.per]||(S.obsDT[ui.per]={});if(t.value.trim())o[t.dataset.id]=t.value;else delete o[t.dataset.id];persist()}\n  else if(a==='indn'||a==='indt'){const o=t.dataset.o,kk=t.dataset.k;const x=ensureInf(o+'|'+ui.per);const e=(x.ind[kk]=x.ind[kk]||{});if(a==='indn')e[t.dataset.f]=num(t.value);else e[t.dataset.f]=t.value.trim();persist();const c=document.getElementById('idyn_'+o+'_'+kk);if(c)c.innerHTML=indDyn(o,kk,ui.per)}\n  else if(a==='ind'){ensureInf(k).ind[t.dataset.k]=num(t.value);persist()}\n  else if(a==='txt'){const x=ensureInf(k);(x.txt[t.dataset.b]=x.txt[t.dataset.b]||{})[t.dataset.f]=t.value;persist()}\n  else if(a==='fdes'){ui.fDes[t.dataset.k]=t.value;render()}\n  else if(a==='fcom'){ui.fCom[t.dataset.k]=t.value;render()}\n  else if(a==='destado'){const d=S.desvios.find(x=>x.id===t.dataset.id);d.estado=t.value;persist();keep()}\n  else if(a==='onombre'){S.obras.find(x=>x.id===t.dataset.id).nombre=t.value;persist()}\n  else if(a==='peso'){S.cfg.w[t.dataset.k]=Math.max(0,Number(t.value)||0)/100;persist()}\n  else if(a==='meta'){S.cfg[t.dataset.k]=Math.min(100,Math.max(0,Number(t.value)||0))/100;persist()}\n  else if(a==='impfile'){const f=t.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(!j||!Array.isArray(j.obras)||!j.checks)throw 0;S=Object.assign(defaultState(),j);persist();ui.msg='Copia restaurada.';render()}catch(x){document.getElementById('impMsg').textContent='El archivo no es una copia válida.'}};r.readAsText(f)}\n});\ndocument.addEventListener('submit',e=>{e.preventDefault();const f=e.target,fd_=Object.fromEntries(new FormData(f));\n  if(f.id==='fdesForm'){const d={id:ui.form.id||uid(),fecha:fd_.fecha,obra:fd_.obra,evento:fd_.evento.trim(),tipo:fd_.tipo,detecta:fd_.detecta,impDias:num(fd_.impDias),plan:fd_.plan.trim(),fechaPA:fd_.fechaPA||null,resp:fd_.resp.trim(),estado:fd_.estado,prio:fd_.prio,retrab:fd_.retrab||'',paral:fd_.paral||''};\n    const i=S.desvios.findIndex(x=>x.id===d.id);if(i>=0)S.desvios[i]=Object.assign(S.desvios[i],d);else S.desvios.push(d);}\n  else if(f.id==='fcomForm'){const c={id:ui.form.id||uid(),obra:fd_.obra,req:fd_.req.trim(),desc:fd_.desc.trim(),inicio:fd_.inicio,fin:fd_.fin||null,pedidos:num(fd_.pedidos),entregados:num(fd_.entregados),pIni:num(fd_.pIni),pCompra:num(fd_.pCompra),obs:fd_.obs.trim()};\n    const i=S.compras.findIndex(x=>x.id===c.id);if(i>=0)S.compras[i]=c;else S.compras.push(c);}\n  else return;ui.form=null;persist();render()});\n\nasync function boot(){\n  setStatus('load');\n  try{const c=window.claude;if(c&&c.use){db=await c.use('db');dl=await c.use('downloads')}}catch(e){db=null}\n  let loaded=null;\n  if(db){try{const s=await db.doc('app/state').get();dbReady=true;if(s.exists&&s.data().json){loaded=JSON.parse(s.data().json);lastAt=s.data().at||0}}catch(e){}}\n  if(!loaded){try{const l=localStorage.getItem('co_state');if(l)loaded=JSON.parse(l)}catch(e){}}\n  S=migrate(loaded||{});\n  const ms=monthsWithData();const now=isoToday().slice(0,7);const cnt={};Object.keys(S.checks).forEach(k=>{const m=k.split('|')[1];cnt[m]=(cnt[m]||0)+1});const good=ms.filter(m=>cnt[m]>=Math.ceil(activas().length/2));ui.per=good.length?good[good.length-1]:(ms.length?ms[ms.length-1]:now);\n  const h=(location.hash||'').slice(1);if(TABS.some(t=>t[0]===h))ui.tab=h;\n  ui.obra=(activas()[0]||{}).id||'';\n  render();setStatus(db?(dbReady?'ok':'err'):'local');\n  if(db&&dbReady){try{db.doc('app/state').onSnapshot(snap=>{if(!snap.exists)return;const d=snap.data();if(!d||!d.json||d.at===lastAt||saveT)return;try{S=migrate(JSON.parse(d.json));lastAt=d.at;keep()}catch(e){}})}catch(e){}}}\nboot();\n</script>\n"
+ }
+}
