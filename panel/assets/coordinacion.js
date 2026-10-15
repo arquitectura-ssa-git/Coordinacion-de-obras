@@ -352,7 +352,7 @@ window.Coord = (() => {
         <p id="c-msg" style="margin-bottom:0"></p></section>
       ${S ? `<section class="card"><h2>Datos cargados</h2>${resumenDatos}
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
-          <button class="btn mini" data-c-exportar>Descargar copia (.json)</button>
+          ${P.CFG.ARTIFACT ? '' : '<button class="btn mini" data-c-exportar>Descargar copia (.json)</button>'}
           <button class="btn mini plano" data-c-borrar>Borrar datos de este navegador</button></div></section>` : ''}
     </div>`;
   }
