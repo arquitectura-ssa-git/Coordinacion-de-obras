@@ -296,7 +296,11 @@ window.Coord = (() => {
     const conDatos = filas.filter(f => f.sc.pct != null);
     const media = prom(conDatos.map(f => f.sc.pct));
     const ab = abiertos().filter(d => os.some(o => o.id === d.obra));
-    const exact = prom(S.compras.map(c => compra(c).ex));
+    // Como en la app de coordinación: compras del último mes con movimiento (llegada o inicio).
+    const mesCompra = c => (c.fin || c.inicio || '').slice(0, 7);
+    const ultMes = S.compras.map(mesCompra).filter(Boolean).sort().slice(-1)[0];
+    const cm = S.compras.filter(c => mesCompra(c) === ultMes).map(compra);
+    const exact = prom(cm.map(k => k.ex)), cicloMes = prom(cm.map(k => k.ciclo));
     const mesTxt = P.mes(per);
 
     const tablaObras = tabla([{ t: 'Obra' }, { t: 'DT' }, { t: 'Conformidad' }, { t: 'Carga', n: 1 }, { t: 'Bloque más bajo' }, { t: 'Desvíos abiertos', n: 1 }, { t: 'Estado' }],
@@ -327,7 +331,7 @@ window.Coord = (() => {
         <div class="kpi ${nivel(media) === 'rojo' ? 'rojo' : nivel(media) === 'amarillo' ? 'amarillo' : ''}"><b>${pc(media)}</b><span>Conformidad media · meta ${pc(S.cfg.meta)}</span></div>
         <div class="kpi ${conDatos.some(f => f.sc.pct < S.cfg.alerta) ? 'rojo' : ''}"><b>${conDatos.filter(f => f.sc.pct < S.cfg.meta).length}</b><span>Obras bajo la meta (${conDatos.filter(f => f.sc.pct < S.cfg.alerta).length} no conformes)</span></div>
         <div class="kpi ${ab.some(vencido) ? 'rojo' : ''}"><b>${ab.length}</b><span>Desvíos abiertos · ${ab.filter(vencido).length} con plan vencido</span></div>
-        <div class="kpi"><b>${pc(exact)}</b><span>Exactitud de compras (meta 95 %)</span></div>
+        <div class="kpi"><b>${pc(exact)}</b><span>Exactitud de compras (meta 95 %) · ${cm.length ? `${cm.length} req. de ${esc(P.mes(ultMes))}${cicloMes != null ? `, ciclo medio ${P.dec(cicloMes)} días` : ''}` : 'sin requerimientos'}</span></div>
       </div>
       <section class="card" style="margin-bottom:14px"><h2>Conformidad por obra · ${esc(mesTxt)}</h2>
         <p class="muted chico" style="margin-top:-6px">De la más baja a la más alta. La rayita marca la meta. Carga: qué parte de los controles del mes ya está marcada.</p>${tablaObras}</section>
