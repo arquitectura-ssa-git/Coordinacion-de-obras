@@ -33,6 +33,7 @@ window.Reglas = (() => {
     { id: 'calidad', nombre: 'Controles de calidad', corto: 'Calidad' },
     { id: 'actas', nombre: 'Actas y etapas', corto: 'Actas' },
     { id: 'notas', nombre: 'Notas de obra', corto: 'Notas' },
+    { id: 'desvios', nombre: 'Desvíos', corto: 'Desvíos' },
   ];
   const NIVELES = ['critico', 'rojo', 'amarillo', 'verde'];
   const NOMBRE_NIVEL = { critico: 'Crítico', rojo: 'Rojo', amarillo: 'Amarillo', verde: 'En orden' };
@@ -58,7 +59,9 @@ window.Reglas = (() => {
   function materiales(obra, hoy) {
     const filas = [];
     obra.tareas.forEach(t => (t.materiales || []).forEach(m => {
-      const pedido = (obra.pedidos || []).find(p => p.id_tarea === t.id && p.material === m.nombre);
+      const compra = (obra.compras || []).find(c => c.material === `${t.id}|${m.nombre}`);
+      const pedido = (obra.pedidos || []).find(p => p.id_tarea === t.id && p.material === m.nombre)
+        || (compra ? { id_tarea: t.id, material: m.nombre, estado: compra.fin ? 'recibido' : 'pedido', fecha: compra.inicio, entrega: compra.fin || null, req: compra.req } : null);
       const limite = P.restarHabiles(t.inicio, m.plazo + UMBRALES.margenPedidoDias);
       const diasLimite = P.dias(hoy, limite);
       let nivel = 'verde';
@@ -69,7 +72,7 @@ window.Reglas = (() => {
         if (diasLimite < 0) nivel = t.critica ? 'critico' : 'rojo';
         else if (diasLimite <= 7) nivel = 'amarillo';
       }
-      filas.push({ tarea: t, material: m, pedido, estado, limite, diasLimite, nivel });
+      filas.push({ tarea: t, material: m, pedido, compra, estado, limite, diasLimite, nivel });
     }));
     return filas.sort((a, b) => NIVELES.indexOf(a.nivel) - NIVELES.indexOf(b.nivel) || a.limite.localeCompare(b.limite));
   }
@@ -92,7 +95,9 @@ window.Reglas = (() => {
     return (obra.reportes || []).filter(r => r.confirmado).sort((a, b) => b.fecha.localeCompare(a.fecha))[0] || null;
   }
 
+  // null: la obra todavía no recibe reportes del bot (obras reales en la prueba).
   function habilesSinReportar(obra, hoy) {
+    if (obra.conBot === false) return null;
     const ult = ultimoReporte(obra);
     let d = P.habilAnterior(hoy);
     let n = 0;
@@ -105,13 +110,14 @@ window.Reglas = (() => {
     const U = UMBRALES;
     const out = [];
     const dt = (personas || []).find(p => p.id === obra.dt);
+    const dts = obra.dts || [obra.dt];
     const add = (modulo, clave, nivel, titulo, detalle, desde) =>
-      out.push({ id: `${modulo}:${obra.id}:${clave}`, obra: obra.id, dt: obra.dt, modulo, nivel, titulo, detalle, desde: desde || hoy });
+      out.push({ id: `${modulo}:${obra.id}:${clave}`, obra: obra.id, dt: obra.dt, dts, modulo, nivel, titulo, detalle, desde: desde || hoy });
     const tarea = id => obra.tareas.find(t => t.id === id);
     const enCurso = obra.estado === 'en curso';
 
     // Reportes diarios
-    if (enCurso) {
+    if (enCurso && obra.conBot !== false) {
       const n = habilesSinReportar(obra, hoy);
       const ult = ultimoReporte(obra);
       if (n >= 2) add('reportes', 'sin-reporte', 'rojo', `${n} días hábiles sin reporte`, `${dt ? dt.nombre : 'El DT'} no confirma un reporte desde el ${P.fecha(ult && ult.fecha)}.`, ult && ult.fecha);
@@ -154,7 +160,7 @@ window.Reglas = (() => {
     // Certificaciones
     const mesAnterior = P.sumarDias(hoy.slice(0, 8) + '01', -1).slice(0, 7);
     const certs = obra.certificados || [];
-    if (enCurso && obra.inicio.slice(0, 7) <= mesAnterior && Number(hoy.slice(8)) > U.diaPresentarCertificado) {
+    if (enCurso && obra.inicio && obra.inicio.slice(0, 7) <= mesAnterior && Number(hoy.slice(8)) > U.diaPresentarCertificado) {
       const c = certs.find(x => x.periodo === mesAnterior);
       if (!c || c.estado === 'borrador') add('certificaciones', `sin-${mesAnterior}`, 'amarillo', `Certificado de ${P.mes(mesAnterior)} sin presentar`, `Se presenta hasta el día ${U.diaPresentarCertificado} de cada mes.`);
     }
@@ -213,6 +219,16 @@ window.Reglas = (() => {
       const clave = `${n.tipo}-${n.numero}`;
       if (n.plazo < hoy) add('notas', clave, 'rojo', `${n.tipo} N° ${n.numero} vencida`, `${n.asunto}. Plazo ${P.fecha(n.plazo)}.`, n.plazo);
       else if (P.dias(hoy, n.plazo) <= 2) add('notas', clave, 'amarillo', `${n.tipo} N° ${n.numero} vence el ${P.fecha(n.plazo)}`, n.asunto, n.fecha);
+    });
+
+    // Desvíos (registro de la app de coordinación): plan vencido o prioridad crítica/urgente
+    (obra.desvios || []).filter(d => d.estado !== 'cerrado').forEach(d => {
+      const vencido = d.fechaPA && d.fechaPA < hoy;
+      const fuerte = d.prio === 'crítico' || d.prio === 'urgente';
+      if (!vencido && !fuerte) return;
+      const nivel = vencido && fuerte ? 'critico' : vencido || d.prio === 'crítico' ? 'rojo' : 'amarillo';
+      const plazo = d.fechaPA ? (vencido ? `Plan de acción vencido el ${P.fecha(d.fechaPA)}` : `Plan de acción hasta el ${P.fecha(d.fechaPA)}`) : 'Sin fecha de plan de acción';
+      add('desvios', d.id, nivel, d.evento, `${plazo}. ${d.plan || 'Sin plan de acción'}${d.resp ? ` (resp. ${d.resp})` : ''}. Prioridad ${d.prio || 'normal'}.`, d.fecha);
     });
 
     return out;

@@ -327,19 +327,62 @@ window.PanelDemo = (() => {
 
   const COLECCIONES = ['certificados', 'documentos', 'requerimientos', 'controles', 'actas', 'hys', 'notas', 'pedidos'];
 
+  // ---------- obras reales ----------
+  // Si se importó el JSON de coordinación (assets/coordinacion.js), el panel usa esas obras y DT en lugar de las
+  // ficticias. Lo que la oficina carga para ellas (certificados, láminas…) se guarda aparte y no se regenera.
+  const CLAVE_COORD = 'panel.coord1';
+  const CLAVE_REALES = 'panel.reales1';
+  const CLAVE_MODO = 'panel.modo';
+  const VACIAS = ['tareas', 'reportes', 'rubros', ...COLECCIONES];
+
+  function reales() {
+    const S = P.local.leer(CLAVE_COORD);
+    if (!S || !Array.isArray(S.obras)) return null;
+    const g = P.local.leer(CLAVE_REALES) || { obras: {}, vistas: {} };
+    const personas = [PERSONAS[0], ...(S.dts || []).map(d => ({ id: d.id, nombre: d.nombre, rol: 'DT', email: '' }))];
+    const obras = S.obras.filter(o => o.activa).map(o => {
+      const guardado = g.obras[o.id] || {};
+      const base = Object.fromEntries(VACIAS.map(k => [k, []]));
+      return Object.assign(base, guardado, {
+        id: o.id, codigo: o.id, nombre: o.nombre, comitente: guardado.comitente || '', direccion: guardado.direccion || '',
+        dt: (o.dts || [])[0] || '', dts: o.dts || [], estado: 'en curso', conBot: false, real: true,
+        inicio: guardado.inicio || null, fin: guardado.fin || null, presupuesto: guardado.presupuesto || 0,
+        etapas: guardado.etapas || [{ nombre: 'En ejecución', estado: 'en curso', inicio: null, fin: null }],
+        desvios: (S.desvios || []).filter(d => d.obra === o.id),
+        compras: (S.compras || []).filter(c => c.obra === o.id),
+      });
+    });
+    return { g, personas, obras };
+  }
+  const modoEjemplo = () => P.local.leer(CLAVE_MODO) === 'ejemplo';
+
   async function llamar(c) {
     await new Promise(r => setTimeout(r, 120));
-    const b = cargar();
+    if (c.accion === 'modo') {
+      P.local.escribir(CLAVE_MODO, c.modo === 'ejemplo' ? 'ejemplo' : 'reales');
+      return { ok: true };
+    }
+    const re = reales();
+    const usarReales = re && !modoEjemplo();
+    const b = usarReales ? { generado: P.iso(new Date()), obras: re.obras, vistas: re.g.vistas } : cargar();
+    const personas = usarReales ? re.personas : PERSONAS;
+    const persistir = () => {
+      if (!usarReales) { P.local.escribir(CLAVE, b); return; }
+      re.obras.forEach(o => {
+        re.g.obras[o.id] = Object.fromEntries([...COLECCIONES, 'etapas'].map(k => [k, o[k]]));
+      });
+      P.local.escribir(CLAVE_REALES, re.g);
+    };
     const hoy = b.generado;
     switch (c.accion) {
       case 'estado': {
-        const alertas = R.ordenar(b.obras.flatMap(o => R.evaluar(o, hoy, PERSONAS)))
+        const alertas = R.ordenar(b.obras.flatMap(o => R.evaluar(o, hoy, personas)))
           .map(a => Object.assign(a, { vista: !!b.vistas[a.id] }));
-        return { ok: true, hoy, demo: true, usuario: PERSONAS[0], personas: PERSONAS, obras: b.obras, alertas };
+        return { ok: true, hoy, demo: true, reales: !!usarReales, hayReales: !!re, usuario: personas[0], personas, obras: b.obras, alertas };
       }
       case 'alerta': {
         if (c.vista) b.vistas[c.id] = hoy; else delete b.vistas[c.id];
-        P.local.escribir(CLAVE, b);
+        persistir();
         return { ok: true };
       }
       case 'guardar': {
@@ -358,11 +401,12 @@ window.PanelDemo = (() => {
         } else {
           return { ok: false, error: 'validacion', mensaje: 'Tipo de carga desconocido.' };
         }
-        P.local.escribir(CLAVE, b);
+        persistir();
         return { ok: true };
       }
       case 'reiniciar':
         P.local.borrar(CLAVE);
+        P.local.escribir(CLAVE_MODO, 'ejemplo');
         return { ok: true };
       default:
         return { ok: false, error: 'accion', mensaje: `Acción desconocida: ${c.accion}` };

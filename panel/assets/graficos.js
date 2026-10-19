@@ -60,6 +60,7 @@ window.Graficos = (() => {
   }
 
   function curvaS(obra, hoy) {
+    if (!obra.tareas.length || !obra.inicio) return '<p class="vacio">La obra no tiene cronograma cargado.</p>';
     const ini = obra.inicio;
     const fin = obra.tareas.reduce((a, t) => (t.fin > a ? t.fin : a), obra.inicio);
     const total = Math.max(1, P.dias(ini, fin));

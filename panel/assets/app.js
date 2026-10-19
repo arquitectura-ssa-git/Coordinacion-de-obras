@@ -28,6 +28,17 @@
   const alertasDe = (obraId, modulo) => (idx.alertasObra[obraId] || []).filter(a => !modulo || a.modulo === modulo);
   const nivelModulo = (obraId, modulo) => R.peor(alertasDe(obraId, modulo).map(a => a.nivel));
   const nombre = id => (idx.persona[id] ? idx.persona[id].nombre : id || '—');
+  const dtsDe = o => o.dts || [o.dt];
+  const nombresDt = o => dtsDe(o).map(nombre).join(' y ') || '—';
+  const deDt = (o, id) => dtsDe(o).includes(id);
+  // En las obras reales de la prueba, un módulo sin datos cargados se muestra gris en vez de "en orden".
+  const FUENTE = {
+    reportes: o => o.conBot !== false, avance: o => o.tareas.length, materiales: o => o.tareas.length,
+    economico: o => o.presupuesto > 0, certificaciones: o => o.certificados.length, documentacion: o => o.documentos.length,
+    requerimientos: o => o.requerimientos.length, hys: o => o.hys.length || o.reportes.length, calidad: o => o.controles.length || o.tareas.length,
+    actas: o => o.actas.length, notas: o => o.notas.length,
+  };
+  const sinDatos = (o, m) => o.real && FUENTE[m] && !FUENTE[m](o) && !alertasDe(o.id, m).length;
   const modulo = id => R.MODULOS.find(m => m.id === id) || { id, nombre: id, corto: id };
   const enCurso = () => E.obras.filter(o => o.estado === 'en curso');
   const mesAnterior = () => P.sumarDias(E.hoy.slice(0, 8) + '01', -1).slice(0, 7);
@@ -66,7 +77,7 @@
   }
 
   function filtrarAlertas(lista) {
-    return lista.filter(a => (!filtros.obra || a.obra === filtros.obra) && (!filtros.dt || a.dt === filtros.dt)
+    return lista.filter(a => (!filtros.obra || a.obra === filtros.obra) && (!filtros.dt || (a.dts || [a.dt]).includes(filtros.dt))
       && (!filtros.modulo || a.modulo === filtros.modulo) && (!filtros.nivel || a.nivel === filtros.nivel) && (filtros.vistas || !a.vista));
   }
 
@@ -103,11 +114,12 @@
         const al = alertasDe(o.id, m.id);
         const niv = R.peor(al.map(a => a.nivel));
         const tit = al.length ? al.map(a => `• ${a.titulo}`).join('\n') : `${m.nombre}: en orden`;
+        if (sinDatos(o, m.id)) return `<td><a class="sem solo" href="#obra.${o.id}.${m.id}" title="${esc(m.nombre)}: sin datos cargados" aria-label="${esc(m.nombre)}: sin datos">—</a></td>`;
         return `<td><a class="sem ${niv} ${al.length ? '' : 'solo'}" href="#obra.${o.id}.${m.id}" title="${esc(tit)}" aria-label="${esc(m.nombre)}: ${al.length ? al.length + ' alertas' : 'en orden'}">${al.length || '✓'}</a></td>`;
       }).join('');
-      const desvio = o.estado === 'en curso' ? `<small class="muted">${P.signo(av.desvio)} vs previsto</small>` : `<small>${esc(o.estado)}</small>`;
+      const desvio = !o.tareas.length ? '<small class="muted">sin cronograma</small>' : o.estado === 'en curso' ? `<small class="muted">${P.signo(av.desvio)} vs previsto</small>` : `<small>${esc(o.estado)}</small>`;
       return `<tr>
-        <td class="obra"><a href="#obra.${o.id}">${esc(o.nombre)}</a><small>${esc(o.codigo)} · ${esc(nombre(o.dt))} · ${esc(etapa.nombre)}</small></td>
+        <td class="obra"><a href="#obra.${o.id}">${esc(o.nombre)}</a><small>${esc(o.codigo)} · ${esc(nombresDt(o))} · ${esc(etapa.nombre)}</small></td>
         <td style="text-align:left">${miniBarra(av)}${desvio}</td>${celdas}</tr>`;
     }).join('');
 
@@ -125,7 +137,7 @@
       <section class="card" aria-labelledby="t-matriz">
         <h2 id="t-matriz">Semáforo por obra</h2>
         <div class="desliza"><table class="matriz"><thead><tr><th class="obra">Obra</th><th style="text-align:left">Avance real</th>${cols.map(m => `<th title="${esc(m.nombre)}">${esc(m.corto)}</th>`).join('')}</tr></thead><tbody>${filas}</tbody></table></div>
-        <div class="leyenda">${sem('critico', 'Crítico')} ${sem('rojo', 'Rojo')} ${sem('amarillo', 'Amarillo')} ${sem('verde', 'En orden')} <span>El número es la cantidad de alertas. La rayita en la barra marca el avance previsto.</span></div>
+        <div class="leyenda">${sem('critico', 'Crítico')} ${sem('rojo', 'Rojo')} ${sem('amarillo', 'Amarillo')} ${sem('verde', 'En orden')} ${E.reales ? '<span class="sem solo">— Sin datos</span> ' : ''}<span>El número es la cantidad de alertas. La rayita en la barra marca el avance previsto.</span></div>
       </section>
       <section class="pila" style="margin-top:14px" aria-labelledby="t-urg">
         <div class="cab" style="margin:8px 0 0"><h2 id="t-urg" class="rotulo" style="margin:0">Críticas y en rojo (${urgentes.length})</h2><a class="btn mini" href="#alertas">Ver todas las alertas</a></div>
@@ -143,12 +155,12 @@
 
   function dts() {
     const tarjetas = E.personas.filter(p => p.rol === 'DT').map(p => {
-      const obras = E.obras.filter(o => o.dt === p.id);
-      const al = E.alertas.filter(a => a.dt === p.id);
+      const obras = E.obras.filter(o => deDt(o, p.id));
+      const al = E.alertas.filter(a => (a.dts || [a.dt]).includes(p.id));
       const c = conteo(al);
       const filasObra = obras.map(o => {
         const n = o.estado === 'en curso' ? R.habilesSinReportar(o, E.hoy) : null;
-        const rep = n == null ? '<span class="muted">en cierre</span>' : n === 0 ? sem('verde', 'al día') : sem(n >= 2 ? 'rojo' : 'amarillo', `${n} día${n > 1 ? 's' : ''} sin reporte`);
+        const rep = o.conBot === false ? '<span class="muted chico">sin reportes del bot</span>' : n == null ? '<span class="muted">en cierre</span>' : n === 0 ? sem('verde', 'al día') : sem(n >= 2 ? 'rojo' : 'amarillo', `${n} día${n > 1 ? 's' : ''} sin reporte`);
         return `<div class="fila-dato"><span>${esc(o.nombre)}</span>${rep}</div>`;
       }).join('');
       return `<a class="card persona" href="#dt.${p.id}">
@@ -163,8 +175,8 @@
   function dt(id) {
     const p = idx.persona[id];
     if (!p) return noEncontrado();
-    const obras = E.obras.filter(o => o.dt === id);
-    const al = E.alertas.filter(a => a.dt === id);
+    const obras = E.obras.filter(o => deDt(o, id));
+    const al = E.alertas.filter(a => (a.dts || [a.dt]).includes(id));
     const pend = obras.flatMap(o => [
       ...o.requerimientos.filter(r => r.estado === 'abierto').map(r => [o, 'Requerimiento', r.asunto, r.plazo]),
       ...o.notas.filter(n => n.estado === 'pendiente').map(n => [o, `${n.tipo} N° ${n.numero}`, n.asunto, n.plazo]),
@@ -175,7 +187,7 @@
       const ult = R.ultimoReporte(o);
       return `<tr>${td(`<a href="#obra.${o.id}">${esc(o.nombre)}</a>`)}${td(etiqueta(o.estado))}${td(miniBarra(av))}${td(`${P.signo(av.desvio)}`, 1)}${td(ult ? `${P.fecha(ult.fecha)} (N° ${ult.n})` : '—')}${td(sem(nivelObra(o.id), alertasDe(o.id).length || '✓'))}</tr>`;
     });
-    return `<div class="cab"><div><h1>${esc(p.nombre)}</h1><p>Director técnico · ${esc(p.email)}</p></div><a class="btn" href="#dts">Todos los DT</a></div>
+    return `<div class="cab"><div><h1>${esc(p.nombre)}</h1><p>Director técnico${p.email ? ` · ${esc(p.email)}` : ''}</p></div><a class="btn" href="#dts">Todos los DT</a></div>
       <div class="grilla-2">
         <section class="card"><h2>Obras a cargo</h2>${tabla([{ t: 'Obra' }, { t: 'Estado' }, { t: 'Avance' }, { t: 'Desvío', n: 1 }, { t: 'Último reporte' }, { t: 'Alertas' }], filasObra)}</section>
         <section class="card"><h2>Pendientes abiertos</h2>${tabla([{ t: 'Obra' }, { t: 'Qué' }, { t: 'Asunto' }, { t: 'Plazo' }],
@@ -198,20 +210,20 @@
     const ult = R.ultimoReporte(o);
     const sinRep = o.estado === 'en curso' ? R.habilesSinReportar(o, E.hoy) : 0;
     const c = conteo(alertasDe(id));
-    const faltan = P.dias(E.hoy, o.fin);
+    const faltan = o.fin ? P.dias(E.hoy, o.fin) : null;
     const tabs = PESTANAS.map(([t, n]) => {
       const niv = R.MODULOS.some(m => m.id === t) ? nivelModulo(id, t) : null;
       return `<a href="#obra.${id}.${t}" class="${t === pestana ? 'activo' : ''}">${niv ? `<span class="punto ${niv}"></span>` : ''}${esc(n)}</a>`;
     }).join('');
     const cuerpo = (PESTANA_VISTA[pestana] || PESTANA_VISTA.resumen)(o);
-    return `<div class="cab"><div><h1>${esc(o.nombre)}</h1><p>${esc(o.codigo)} · ${esc(o.comitente)} · ${esc(o.direccion)}</p></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" href="#dt.${o.dt}">DT: ${esc(nombre(o.dt))}</a><a class="btn primario" href="#cargar">Cargar</a></div></div>
+    return `<div class="cab"><div><h1>${esc(o.nombre)}</h1><p>${[o.codigo, o.comitente, o.direccion].filter(Boolean).map(esc).join(' · ')}</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">${dtsDe(o).map(d => `<a class="btn" href="#dt.${d}">DT: ${esc(nombre(d))}</a>`).join('')}<a class="btn primario" href="#cargar">Cargar</a></div></div>
       <div class="ficha-cab">
         <div class="dato"><span>Etapa</span><b>${esc(etapa.nombre)}</b> <small>${esc(o.estado)}</small></div>
         <div class="dato"><span>Avance real / previsto</span><b>${P.pct(av.real)}</b> <small>/ ${P.pct(av.previsto)} (${P.signo(av.desvio)})</small></div>
         <div class="dato"><span>Certificado / avance físico</span><b>${P.pct(eco.pctCert)}</b> <small>/ ${P.pct(eco.pctFisico)}</small></div>
         <div class="dato"><span>Último reporte</span><b>${ult ? `N° ${ult.n} · ${P.fecha(ult.fecha)}` : '—'}</b> ${sinRep ? `<small>${sinRep} día${sinRep > 1 ? 's' : ''} hábil${sinRep > 1 ? 'es' : ''} sin reporte</small>` : ''}</div>
-        <div class="dato"><span>Fin previsto</span><b>${P.fecha(o.fin)}</b> <small>${faltan >= 0 ? `faltan ${faltan} días` : `hace ${-faltan} días`}</small></div>
+        <div class="dato"><span>Fin previsto</span><b>${P.fecha(o.fin)}</b> <small>${faltan == null ? 'sin cronograma' : faltan >= 0 ? `faltan ${faltan} días` : `hace ${-faltan} días`}</small></div>
         <div class="dato"><span>Alertas</span><b class="num">${c.critico + c.rojo + c.amarillo}</b> <small>${c.critico} crít. · ${c.rojo} rojas · ${c.amarillo} amar.</small></div>
       </div>
       <nav class="tabs" aria-label="Módulos de la obra">${tabs}</nav>
@@ -277,8 +289,8 @@
       return `${bloqueAlertas(o, 'materiales')}
         <section class="card"><h2>Previsión de materiales</h2>
         <p class="muted chico" style="margin-top:-6px">Fecha límite de pedido = inicio de la tarea − plazo de entrega − ${R.UMBRALES.margenPedidoDias} días hábiles de margen.</p>
-        ${tabla([{ t: 'Nivel' }, { t: 'Material' }, { t: 'Cantidad', n: 1 }, { t: 'Para' }, { t: 'Proveedor' }, { t: 'Plazo', n: 1 }, { t: 'Límite de pedido' }, { t: 'Estado' }, { t: '' }],
-          filas.map(f => `<tr>${td(sem(f.nivel, R.NOMBRE_NIVEL[f.nivel]))}${td(esc(f.material.nombre))}${td(`${f.material.cantidad} ${esc(f.material.unidad)}`, 1)}${td(`${esc(f.tarea.id)} · ${P.fecha(f.tarea.inicio)}`)}${td(esc(f.material.proveedor))}${td(f.material.plazo + ' d', 1)}${td(P.fecha(f.limite))}${td(etiqueta(f.estado) + (f.pedido && f.pedido.entrega ? ` <span class="muted chico">entrega ${P.fecha(f.pedido.entrega)}</span>` : ''))}<td>${['sin pedir', 'pedido'].includes(f.estado) ? botonCarga('pedido', f.estado === 'pedido' ? 'Actualizar' : 'Registrar pedido', o.id, { material: `${f.tarea.id}|${f.material.nombre}`, estado: f.estado === 'pedido' ? 'recibido' : 'pedido' }) : ''}</td></tr>`), 'La obra no tiene materiales cargados en el cronograma.')}</section>`;
+        ${tabla([{ t: 'Nivel' }, { t: 'Material' }, { t: 'Cantidad', n: 1 }, { t: 'Para' }, { t: 'Proveedor' }, { t: 'Plazo', n: 1 }, { t: 'Límite de pedido' }, { t: 'Estado' }, { t: 'Req. de compra' }, { t: '' }],
+          filas.map(f => `<tr>${td(sem(f.nivel, R.NOMBRE_NIVEL[f.nivel]))}${td(esc(f.material.nombre))}${td(`${f.material.cantidad} ${esc(f.material.unidad)}`, 1)}${td(`${esc(f.tarea.id)} · ${P.fecha(f.tarea.inicio)}`)}${td(esc(f.material.proveedor))}${td(f.material.plazo + ' d', 1)}${td(P.fecha(f.limite))}${td(etiqueta(f.estado) + (f.pedido && f.pedido.entrega ? ` <span class="muted chico">entrega ${P.fecha(f.pedido.entrega)}</span>` : ''))}${td(f.compra ? `<a href="#coord.compras">${esc(f.compra.req)}</a>` : '<span class="muted">—</span>')}<td>${['sin pedir', 'pedido'].includes(f.estado) ? botonCarga('pedido', f.estado === 'pedido' ? 'Actualizar' : 'Registrar pedido', o.id, { material: `${f.tarea.id}|${f.material.nombre}`, estado: f.estado === 'pedido' ? 'recibido' : 'pedido' }) : ''}</td></tr>`), 'La obra no tiene materiales cargados en el cronograma.')}</section>`;
     },
 
     economico(o) {
@@ -368,6 +380,16 @@
           o.notas.map(n => `<tr>${td(esc(n.tipo))}${td(n.numero, 1)}${td(P.fecha(n.fecha))}${td(`${esc(n.emisor)} → ${esc(n.destinatario)}`)}${td(esc(n.asunto))}${td(P.fecha(n.plazo))}${td(etiqueta(n.estado))}${td(n.impacto ? '<span class="etiqueta warn">impacta</span>' : '—')}</tr>`), 'Sin notas.')}</section>`;
     },
 
+    desvios(o) {
+      const lista = (o.desvios || []).slice().sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+      return `${bloqueAlertas(o, 'desvios')}
+        <section class="card"><div class="cab" style="margin:0 0 10px"><h2 style="margin:0">Registro de desvíos</h2><a class="btn mini" href="#coord.desvios">Cargar o editar en Coordinación</a></div>
+        <p class="muted chico" style="margin-top:-4px">Entran al semáforo los abiertos con plan de acción vencido o prioridad crítica o urgente.</p>
+        ${tabla([{ t: 'Fecha' }, { t: 'Desvío' }, { t: 'Tipo' }, { t: 'Plan de acción' }, { t: 'Fecha plan' }, { t: 'Responsable' }, { t: 'Prioridad' }, { t: 'Estado' }],
+          lista.map(d => `<tr>${td(P.fecha(d.fecha))}${td(esc(d.evento))}${td(esc(d.tipo))}${td(`<span class="chico">${esc(d.plan || '—')}</span>`)}${td(d.estado !== 'cerrado' && d.fechaPA && d.fechaPA < E.hoy ? `<span class="etiqueta bad">${P.fecha(d.fechaPA)}</span>` : P.fecha(d.fechaPA))}${td(esc(d.resp || '—'))}${td(esc(d.prio || 'normal'))}${td(etiqueta(d.estado))}</tr>`),
+          o.real ? 'Sin desvíos registrados para esta obra.' : 'Las obras de ejemplo no tienen desvíos. Importá tus datos en Coordinación.')}</section>`;
+    },
+
     informe(o) { return informeObra(o); },
   };
 
@@ -391,7 +413,7 @@
     return `<article class="card informe">
       <p class="rotulo">Informe semanal · ${P.fechaLarga(P.sumarDias(E.hoy, -6))} al ${P.fechaLarga(E.hoy)}</p>
       <h2 style="margin-top:0;font-size:22px">${esc(o.nombre)}</h2>
-      <p class="muted">${esc(o.codigo)} · ${esc(o.comitente)} · DT ${esc(nombre(o.dt))}</p>
+      <p class="muted">${[o.codigo, o.comitente].filter(Boolean).map(esc).join(' · ')} · DT ${esc(nombresDt(o))}</p>
       <div class="resumen">${resumen.map(esc).join('<br>')}</div>
       <h2>Alertas (${c.critico} críticas, ${c.rojo} rojas, ${c.amarillo} amarillas)</h2>${li(R.ordenar(al).map(a => `<li><b>${R.NOMBRE_NIVEL[a.nivel]}:</b> ${esc(a.titulo)}. ${esc(a.detalle)}</li>`))}
       <h2>La semana en obra</h2>
@@ -420,7 +442,7 @@
       const eco = R.economico(o, E.hoy);
       const c = conteo(alertasDe(o.id));
       const ult = R.ultimoReporte(o);
-      return `<tr>${td(`<a href="#obra.${o.id}">${esc(o.nombre)}</a>`)}${td(esc(nombre(o.dt)))}${td(esc(R.etapaActual(o).nombre))}${td(P.pct(av.real), 1)}${td(P.pct(av.previsto), 1)}${td(`${P.signo(av.desvio)}`, 1)}${td(P.pct(eco.pctCert), 1)}${td(P.fecha(ult && ult.fecha))}${td(`${c.critico ? sem('critico', c.critico) : ''} ${c.rojo ? sem('rojo', c.rojo) : ''} ${c.amarillo ? sem('amarillo', c.amarillo) : ''}`)}</tr>`;
+      return `<tr>${td(`<a href="#obra.${o.id}">${esc(o.nombre)}</a>`)}${td(esc(nombresDt(o)))}${td(esc(R.etapaActual(o).nombre))}${td(P.pct(av.real), 1)}${td(P.pct(av.previsto), 1)}${td(`${P.signo(av.desvio)}`, 1)}${td(P.pct(eco.pctCert), 1)}${td(P.fecha(ult && ult.fecha))}${td(`${c.critico ? sem('critico', c.critico) : ''} ${c.rojo ? sem('rojo', c.rojo) : ''} ${c.amarillo ? sem('amarillo', c.amarillo) : ''}`)}</tr>`;
     });
     const crit = E.alertas.filter(a => a.nivel === 'critico');
     const texto = `Consolidado de obras al ${P.fecha(E.hoy)}: ${E.obras.length} obras, ${crit.length} alertas críticas.\n` + crit.map(a => `- ${idx.obra[a.obra].nombre}: ${a.titulo}`).join('\n');
@@ -451,7 +473,7 @@
     else if (r.vista === 'dt') html = dt(r.a);
     else if (r.vista === 'informes') html = informes(r.a);
     else if (r.vista === 'cargar') html = F.vista(E, r.a);
-    else if (r.vista === 'coord') html = C.vista(r.a, r.b);
+    else if (r.vista === 'coord') html = C.vista(r.a, r.b, E);
     else html = tablero();
     vista.innerHTML = html;
     const activa = { obra: 'tablero', dt: 'dts' }[r.vista] || r.vista;
@@ -461,8 +483,8 @@
     badge.textContent = crit;
     badge.hidden = !crit;
     if (r.vista === 'cargar') F.montar(E, refrescar);
-    if (r.vista === 'coord') C.montar(render);
-    if (P.DEMO) document.getElementById('aviso-demo').hidden = r.vista === 'coord';
+    if (r.vista === 'coord') C.montar(refrescar, E);
+    if (P.DEMO) aviso();
   }
 
   async function refrescar() {
@@ -501,10 +523,21 @@
     }
   });
 
-  window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
+  // Coordinación guarda en el navegador: al cambiar de vista se vuelve a leer el estado.
+  window.addEventListener('hashchange', async () => { await cargar(); render(); window.scrollTo(0, 0); });
+
+  function aviso() {
+    const el = document.getElementById('aviso-demo');
+    el.hidden = false;
+    el.querySelector('.txt-aviso').textContent = E.reales
+      ? 'Prueba con tus obras reales. Los datos quedan solo en este navegador.'
+      : 'Demo con datos ficticios. Lo que cargues queda solo en este navegador.';
+    const b = document.getElementById('reiniciar-demo');
+    b.textContent = E.reales ? 'Ver los datos de ejemplo' : E.hayReales ? 'Usar mis obras reales' : 'Volver a los datos de ejemplo';
+    b.dataset.modo = E.reales ? 'ejemplo' : E.hayReales ? 'reales' : '';
+  }
 
   async function iniciar() {
-    if (P.DEMO) document.getElementById('aviso-demo').hidden = false;
     try {
       await cargar();
       render();
@@ -512,8 +545,9 @@
       vista.innerHTML = `<div class="cab"><div><h1>No se pudo abrir el panel</h1><p class="err-msg">${esc(err.message)}</p></div></div>`;
     }
   }
-  document.getElementById('reiniciar-demo').addEventListener('click', async () => {
-    await P.llamar('reiniciar');
+  document.getElementById('reiniciar-demo').addEventListener('click', async e => {
+    const modo = e.currentTarget.dataset.modo;
+    if (modo) await P.llamar('modo', { modo }); else await P.llamar('reiniciar');
     await refrescar();
   });
   iniciar();
