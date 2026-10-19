@@ -109,12 +109,13 @@ window.Coord = (() => {
     const c = (S.checks[`${obra}|${p}`] || {}).i || {};
     const W = semanas(p);
     const bl = Object.fromEntries(BLOQUES.map(([k]) => [k, { cap: 0, ev: 0, ok: 0, pct: null }]));
+    const sem = W.map(() => ({ ev: 0, ok: 0 }));
     ITEMS.forEach(it => {
       const fila = c[it.n] || [];
       W.forEach((_, wi) => {
         if (aplica(it, wi)) bl[it.b].cap++;
         const v = fila[wi];
-        if (v === 0 || v === 1) { bl[it.b].ev++; bl[it.b].ok += v; }
+        if (v === 0 || v === 1) { bl[it.b].ev++; bl[it.b].ok += v; sem[wi].ev++; sem[wi].ok += v; }
       });
     });
     let sw = 0, sp = 0, cap = 0, ev = 0;
@@ -125,7 +126,7 @@ window.Coord = (() => {
       const w = S.cfg.w[k] ?? 0;
       if (b.pct !== null) { sw += w; sp += w * b.pct; }
     });
-    return { bl, pct: sw ? sp / sw : null, carga: cap ? Math.min(1, ev / cap) : 0, ev };
+    return { bl, pct: sw ? sp / sw : null, carga: cap ? Math.min(1, ev / cap) : 0, ev, wk: sem.map(x => (x.ev ? x.ok / x.ev : null)) };
   }
   const nivel = p => (p == null ? '' : p >= S.cfg.meta ? 'verde' : p >= S.cfg.alerta ? 'amarillo' : 'rojo');
   const NOMBRE = { verde: 'Conforme', amarillo: 'En alerta', rojo: 'No conforme', '': 'Sin datos' };
@@ -247,6 +248,17 @@ window.Coord = (() => {
   const pc = p => (p == null ? '—' : `${Math.round(p * 100)} %`);
   const sem = (niv, txt) => `<span class="sem ${niv}">${esc(txt)}</span>`;
   const barra = p => `<span class="mini-barra" title="Meta ${pc(S.cfg.meta)}"><span class="pista"><span class="real ${nivel(p)}" style="width:${p == null ? 0 : Math.round(p * 100)}%"></span><span class="prev" style="left:${S.cfg.meta * 100}%"></span></span>${pc(p)}</span>`;
+  // Línea de evolución semanal (% de controles cumplidos por semana), con la meta punteada.
+  function linea(vals) {
+    const pts = vals.map((v, i) => (v == null ? null : [i, v])).filter(Boolean);
+    if (!pts.length) return '<span class="muted">—</span>';
+    const w = 84, h = 26, n = Math.max(vals.length - 1, 1);
+    const xy = pts.map(([i, v]) => [4 + (w - 8) * i / n, h - 4 - (h - 8) * v]);
+    const ym = h - 4 - (h - 8) * S.cfg.meta;
+    const ult = xy[xy.length - 1];
+    return `<svg class="linea" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Por semana: ${vals.map(v => (v == null ? 'sin datos' : Math.round(v * 100) + ' %')).join(', ')}">
+      <line x1="4" x2="${w - 4}" y1="${ym}" y2="${ym}" class="l-meta"/>${xy.length > 1 ? `<polyline points="${xy.map(p => p.join(',')).join(' ')}" class="l-real"/>` : ''}<circle cx="${ult[0]}" cy="${ult[1]}" r="3" class="l-punto"/></svg>`;
+  }
   const td = (v, n) => `<td class="${n ? 'n' : ''}">${v}</td>`;
   const tabla = (cols, filas, vacio = 'Sin registros.', clase = '') => (filas.length
     ? `<div class="desliza"><table class="tabla ${clase}"><thead><tr>${cols.map(c => `<th class="${c.n ? 'n' : ''}">${c.t}</th>`).join('')}</tr></thead><tbody>${filas.join('')}</tbody></table></div>`
@@ -303,12 +315,12 @@ window.Coord = (() => {
     const exact = prom(cm.map(k => k.ex)), cicloMes = prom(cm.map(k => k.ciclo));
     const mesTxt = P.mes(per);
 
-    const tablaObras = tabla([{ t: 'Obra' }, { t: 'DT' }, { t: 'Conformidad' }, { t: 'Carga', n: 1 }, { t: 'Bloque más bajo' }, { t: 'Desvíos abiertos', n: 1 }, { t: 'Estado' }],
+    const tablaObras = tabla([{ t: 'Obra' }, { t: 'DT' }, { t: 'Conformidad' }, { t: 'Semanas' }, { t: 'Carga', n: 1 }, { t: 'Bloque más bajo' }, { t: 'Desv.', n: 1 }, { t: 'Venc.', n: 1 }, { t: 'Estado' }],
       filas.map(({ o, sc, ds }) => {
         let bajo = null;
         BLOQUES.forEach(([k, n]) => { const p = sc.bl[k].pct; if (p != null && (!bajo || p < bajo.p)) bajo = { p, n }; });
         const venc = ds.filter(vencido).length;
-        return `<tr>${td(`<a href="#coord.carga.${esc(o.id)}"><b>${esc(o.nombre)}</b></a><div class="muted chico">${esc(o.id)}</div>`)}${td(o.dts.map(nombreDt).map(esc).join('<br>') || '—')}${td(barra(sc.pct))}${td(pc(sc.carga), 1)}${td(bajo ? `${esc(bajo.n)} ${pc(bajo.p)}` : '—')}${td(`${ds.length}${venc ? ` ${etq(`${venc} vencido${venc > 1 ? 's' : ''}`, 'bad')}` : ''}`, 1)}${td(sem(nivel(sc.pct), NOMBRE[nivel(sc.pct)]))}</tr>`;
+        return `<tr>${td(`<a href="#coord.carga.${esc(o.id)}"><b>${esc(o.nombre)}</b></a><div class="muted chico">${esc(o.id)}</div>`)}${td(o.dts.map(nombreDt).map(esc).join('<br>') || '—')}${td(barra(sc.pct))}${td(linea(sc.wk))}${td(pc(sc.carga), 1)}${td(bajo ? `${esc(bajo.n)} ${pc(bajo.p)}` : '—')}${td(ds.length, 1)}${td(venc ? `<span class="ind rojo">${venc}</span>` : '—', 1)}${td(sem(nivel(sc.pct), NOMBRE[nivel(sc.pct)]))}</tr>`;
       }), 'No hay obras activas. Activalas en Obras, DT y datos.');
 
     const mapa = `<div class="desliza"><table class="matriz"><thead><tr><th class="obra">Obra</th>${BLOQUES.map(([, n]) => `<th>${esc(n)}</th>`).join('')}</tr></thead><tbody>${filas.map(({ o, sc }) =>
@@ -612,16 +624,17 @@ window.Coord = (() => {
     E = estado || E;
     cargar();
     const t = tab === 'controles' ? 'carga' : TABS.some(([k]) => k === tab) ? tab : 'resumen';
-    const conMes = S && ['resumen', 'carga', 'indicadores'].includes(t);
-    const cab = `<div class="cab"><div><h1>Coordinación de obras</h1><p>Evaluación de los DT, desvíos, indicadores y compras, con tu planilla de coordinación.</p></div>${conMes ? `<div class="filtros" style="margin:0">${selMes()}</div>` : ''}</div>`;
-    const tabs = `<nav class="tabs" aria-label="Coordinación">${TABS.map(([k, n]) => `<a href="#coord.${k}" class="${k === t ? 'activo' : ''}">${esc(n)}</a>`).join('')}</nav>`;
-    if (!S) return cab + importar();
-    if (!per || !meses().includes(per)) {
+    // El mes se elige antes de armar la cabecera, así el selector muestra el mes que se ve.
+    if (S && (!per || !meses().includes(per))) {
       const cnt = {};
       Object.keys(S.checks).forEach(k => { const m = k.split('|')[1]; cnt[m] = (cnt[m] || 0) + 1; });
       const buenos = Object.keys(cnt).filter(m => cnt[m] >= Math.ceil(activas().length / 2)).sort();
       per = buenos.slice(-1)[0] || meses().slice(-1)[0];
     }
+    const conMes = S && ['resumen', 'carga', 'indicadores'].includes(t);
+    const cab = `<div class="cab"><div><h1>Coordinación de obras</h1><p>Evaluación de los DT, desvíos, indicadores y compras, con tu planilla de coordinación.</p></div>${conMes ? `<div class="filtros" style="margin:0">${selMes()}</div>` : ''}</div>`;
+    const tabs = `<nav class="tabs" aria-label="Coordinación">${TABS.map(([k, n]) => `<a href="#coord.${k}" class="${k === t ? 'activo' : ''}">${esc(n)}</a>`).join('')}</nav>`;
+    if (!S) return cab + importar();
     const cuerpo = { resumen, carga: () => carga(param), desvios, indicadores, compras, obras }[t]();
     return cab + tabs + cuerpo;
   }
