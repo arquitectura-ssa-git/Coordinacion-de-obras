@@ -255,6 +255,33 @@ a.sem:hover, button.sem:hover { filter: brightness(.95); outline: 1px solid curr
 .celda.si { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
 .celda.no { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
 .celda:disabled { cursor: default; opacity: .4; background: transparent; }
+.celda.sug-si { border: 1.5px dashed var(--ok); color: var(--ok); background: transparent; }
+.celda.sug-no { border: 1.5px dashed var(--bad); color: var(--bad); background: transparent; }
+.celda.difiere { box-shadow: 0 0 0 2px var(--warn); }
+.tabla .c-texto, .tabla select, .tabla .num-in {
+  min-height: 32px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); padding: 4px 8px; max-width: 100%;
+}
+.tabla textarea.c-texto { width: 100%; min-width: 200px; min-height: 52px; resize: vertical; }
+.campo textarea.c-texto { width: 100%; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); padding: 8px 10px; }
+.tabla .num-in { width: 72px; text-align: right; font-variant-numeric: tabular-nums; }
+.tabla .num-in:disabled { background: var(--surface-2); color: var(--muted); }
+.obs-fila { display: flex; gap: 6px; min-width: 300px; }
+.obs-fila input { flex: 1; min-width: 0; }
+ul.auto { margin: 0 0 6px; padding-left: 18px; font-size: 13px; }
+.informe-mes td { width: 42%; }
+.informe-mes td:first-child { width: 16%; }
+.tg { min-width: 38px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 700; color: var(--muted); }
+.tg.si { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+.tg.no { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+.ind { font-weight: 700; }
+.ind.verde { color: var(--ok); }
+.ind.rojo { color: var(--bad); }
+.checks { display: flex; gap: 6px 14px; flex-wrap: wrap; font-size: 13.5px; }
+.checks label { display: inline-flex; gap: 5px; align-items: center; white-space: nowrap; }
+.tabla.indicadores tr.primera td { border-top: 2px solid var(--line); }
+.tabla select.estado-warn { color: var(--warn); }
+.tabla select.estado-ok { color: var(--ok); }
+details summary { cursor: pointer; color: var(--accent); font-weight: 600; }
 
 /* ---------- DT ---------- */
 .personas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; }

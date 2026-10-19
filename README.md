@@ -33,7 +33,7 @@ cierra sola en la próxima revisión.
 | Alertas | Listado con filtros por obra, DT, módulo y nivel |
 | Informes | Semanal por obra y consolidado de gerencia |
 | Cargar | Certificados, láminas, requerimientos, controles de calidad, actas, etapa, legajo de HyS y pedidos |
-| Coordinación | Evaluación mensual de los DT (30 controles en 8 bloques, conformidad ponderada), desvíos y compras. Usa los datos reales de la app de coordinación: se importan desde el JSON y quedan solo en el navegador |
+| Coordinación | La app de coordinación dentro del panel: resumen del mes, carga semanal de los 30 controles (con sugerencias automáticas desde reportes, certificados y láminas), registro de desvíos, indicadores de gestión, compras, y alta de obras, DT y parámetros. Se importa desde el JSON y queda solo en el navegador. Con datos importados, todo el panel usa esas obras y DT, y los desvíos vencidos o críticos entran al semáforo |
 
 ## Reglas de alerta
 
