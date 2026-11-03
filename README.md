@@ -1,4 +1,4 @@
-# Seguimiento de obras · Sáez Sánchez
+# Coordinación de obras · Sáez Sánchez
 
 Panel para la coordinación de obras. Muestra en un semáforo el estado de cada obra y de cada director
 técnico (DT), avisa cuando algo se pone en rojo y deja cargar lo que no llega por el reporte diario.
@@ -66,8 +66,13 @@ Abrir <http://localhost:8090>. Lo que se carga queda guardado solo en ese navega
 
 ## Ponerlo en el VPS
 
-Ver [docs/VPS.md](docs/VPS.md): demo del panel en el VPS en unos 15 minutos y, opcional, el bot de
-reporte diario corriendo las 24 h.
+Un solo comando en la terminal del VPS (ver [docs/VPS.md](docs/VPS.md)):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/arquitectura-ssa-git/coordinacion-de-obras/main/scripts/instalar_vps.sh | sudo bash
+```
+
+Opcional: el bot de reporte diario corriendo las 24 h, en la misma guía.
 
 ## Cómo está hecho
 
@@ -84,6 +89,9 @@ Sin frameworks ni compilación: HTML, CSS y JavaScript que el navegador lee tal 
 | `panel/assets/formularios.js` | Formularios de carga de oficina |
 | `panel/assets/graficos.js` | Gantt y curva S |
 | `panel/assets/coordinacion.js` | Sección Coordinación: importa el JSON de la app de coordinación y calcula conformidad, desvíos y compras |
+| `panel/mapa.html` | Mapa del sistema: partes, estado y diagramas de la lógica |
+| `scripts/instalar_vps.sh` | Instala o actualiza el panel en el VPS |
+| `datos/` | Exportaciones de la app de coordinación y su HTML original |
 | `scripts/armar_demo_panel.py` | Junta todo en un solo HTML para compartir la demo como una página |
 
 ## Próximos pasos

@@ -1,76 +1,81 @@
-# Poner la demo en el VPS
+# Poner el panel en el VPS
 
-Guía para un VPS con **Ubuntu 22.04 o 24.04**. Hay dos partes independientes:
+Guía para el VPS de Hostinger (**SSA VPS**, IP `143.95.174.234`) o cualquier VPS con **Ubuntu 22.04 o
+24.04**. Hay dos partes independientes:
 
-1. **Panel de seguimiento** (15 minutos): una página web con datos ficticios. No necesita base de datos
-   ni claves.
-2. **Bot de reporte diario** (opcional, 20 minutos): el bot de Telegram corriendo las 24 h, para que los
-   DT lo prueben desde el celular sin depender de una PC prendida.
+1. **Panel de seguimiento** (10 minutos): la página web con el tablero y la sección Coordinación.
+2. **Bot de reporte diario** (opcional, 20 minutos): el bot de Telegram corriendo las 24 h.
 
-En esta etapa el panel y el bot todavía no comparten datos: el panel muestra sus obras ficticias y el bot
-las suyas. Conectarlos es el próximo paso.
+## Entrar al VPS
 
-## Antes de empezar
+- **Desde Hostinger, sin instalar nada:** en hPanel → VPS → **SSA VPS**, tocá el botón de
+  **Acceso rápido** (el ícono de la terminal) o **Administrar → Terminal del navegador**. Se abre una
+  terminal ya conectada como `root`.
+- **Desde la PC:** `ssh root@143.95.174.234` (la contraseña de root está en hPanel → VPS → Administrar →
+  Acceso SSH).
 
-- La IP del VPS y el usuario con el que se entra por SSH (lo da el proveedor).
-- Opcional pero recomendado: un subdominio apuntando a la IP del VPS, por ejemplo
-  `obras.saezsanchez.com.ar` (un registro **A** en el DNS del dominio). Con dominio, la página sale con
-  HTTPS automático. Sin dominio funciona igual, por `http://` y la IP.
+Opcional: un subdominio apuntando a la IP, por ejemplo `obras.saezsanchez.com.ar` (registro **A** en
+el DNS del dominio con el valor `143.95.174.234`). Con subdominio, la página sale con HTTPS
+automático. Sin subdominio funciona igual por `http://143.95.174.234`.
 
-Entrar al VPS:
+## Instalar el panel con un solo comando
+
+Pegá esto en la terminal del VPS y apretá Enter:
 
 ```bash
-ssh usuario@IP_DEL_VPS
+curl -fsSL https://raw.githubusercontent.com/arquitectura-ssa-git/coordinacion-de-obras/main/scripts/instalar_vps.sh | sudo bash
 ```
 
-## 1. Preparar el servidor
+El script ([`scripts/instalar_vps.sh`](../scripts/instalar_vps.sh)) actualiza el servidor, abre los
+puertos 22, 80 y 443, instala Caddy (servidor web con HTTPS automático), baja este repositorio en
+`/opt/coordinacion-de-obras` y al final pregunta:
+
+1. **Subdominio**: escribilo, o dejalo vacío para entrar por la IP.
+2. **Usuario y contraseña** para entrar al panel, así no queda abierto a cualquiera que tenga el link.
+
+Al terminar muestra la dirección. Abrila, entrá con el usuario y la contraseña, y aparece el tablero.
+El mapa del sistema queda en la misma dirección con `/mapa.html` al final.
+
+### Actualizar el panel
+
+Cada vez que haya cambios en el repositorio:
+
+```bash
+cd /opt/coordinacion-de-obras && sudo git pull
+```
+
+No hace falta reiniciar nada. Para cambiar el usuario, la contraseña o el subdominio, volvé a correr
+el comando de instalación.
+
+### Si no carga
+
+- `sudo journalctl -u caddy -n 50` muestra el error de Caddy.
+- Hostinger tiene además su propio firewall: en hPanel → VPS → **Seguridad → Firewall**, si hay
+  reglas activas, agregá las de los puertos **80** y **443** (TCP, entrada).
+- Con subdominio: puede tardar hasta una hora en apuntar a la IP. Mientras tanto, volvé a correr el
+  instalador dejando el subdominio vacío y entrá por la IP.
+
+### El paso a paso, sin el script
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y git ufw
-sudo ufw allow OpenSSH
-sudo ufw allow 80
-sudo ufw allow 443
-sudo ufw --force enable
-```
-
-## 2. Instalar Caddy (servidor web con HTTPS automático)
-
-```bash
-sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+sudo apt install -y git ufw curl debian-keyring debian-archive-keyring apt-transport-https
+sudo ufw allow OpenSSH && sudo ufw allow 80 && sudo ufw allow 443 && sudo ufw --force enable
 curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
 curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
-sudo apt update
-sudo apt install -y caddy
-```
-
-## 3. Bajar el panel
-
-```bash
-sudo git clone https://github.com/Leoscd/seguimiento-de-obra-saez-sanchez.git /opt/seguimiento-de-obra
-```
-
-## 4. Publicarlo
-
-Crear una contraseña para que la demo no quede abierta a cualquiera que tenga el link:
-
-```bash
+sudo apt update && sudo apt install -y caddy
+sudo git clone https://github.com/arquitectura-ssa-git/coordinacion-de-obras.git /opt/coordinacion-de-obras
 caddy hash-password
-```
-
-Escribí la contraseña dos veces y copiá el texto que devuelve (empieza con `$2a$`). Después editá la
-configuración de Caddy:
-
-```bash
 sudo nano /etc/caddy/Caddyfile
 ```
 
-Borrá lo que tiene y pegá esto. Cambiá `obras.saezsanchez.com.ar` por tu subdominio (o por `:80` si no
-tenés dominio), `coordinacion` por el usuario que quieras y `HASH` por el texto que copiaste:
+En el Caddyfile, reemplazá todo por esto (`:80` o tu subdominio, tu usuario y el texto que devolvió
+`caddy hash-password`, que empieza con `$2a$`), guardá con Ctrl+O, Enter, Ctrl+X, y aplicá con
+`sudo systemctl reload caddy`:
 
 ```
-obras.saezsanchez.com.ar {
-	root * /opt/seguimiento-de-obra/panel
+:80 {
+	root * /opt/coordinacion-de-obras/panel
 	file_server
 	basic_auth {
 		coordinacion HASH
@@ -78,30 +83,7 @@ obras.saezsanchez.com.ar {
 }
 ```
 
-Guardá (Ctrl+O, Enter, Ctrl+X) y aplicá:
-
-```bash
-sudo systemctl reload caddy
-```
-
-Listo: abrí `https://obras.saezsanchez.com.ar` (o `http://IP_DEL_VPS`), entrá con el usuario y la
-contraseña, y aparece el tablero.
-
-Si no carga, mirá el error con `sudo journalctl -u caddy -n 50`. Lo más común: el subdominio todavía no
-apunta a la IP (puede tardar hasta una hora) o los puertos 80 y 443 están cerrados en el panel del
-proveedor del VPS.
-
-### Actualizar el panel
-
-Cada vez que haya cambios en este repo:
-
-```bash
-cd /opt/seguimiento-de-obra && sudo git pull
-```
-
-No hace falta reiniciar nada.
-
-## 5. Opcional: el bot de reporte diario las 24 h
+## Opcional: el bot de reporte diario las 24 h
 
 El bot usa Telegram en modo *long polling*: no necesita dominio ni HTTPS. Hace falta el token del bot
 (se crea en Telegram con @BotFather) y una API key de OpenAI con saldo. El detalle de cómo conseguir
@@ -167,7 +149,10 @@ volvé a correr `scripts/seed_demo.py` y reiniciá el servicio.
 
 ## Cuidados
 
-- El panel de esta etapa no guarda nada en el servidor: lo que cada uno carga queda en su navegador.
-- No cargues datos reales de obras en la demo. Para eso está el sistema real de la próxima etapa, con
-  ingreso por cuenta de Google y permisos por rol.
-- Este repositorio es público. Las contraseñas y claves van solo en el servidor (Caddyfile y `.env`).
+- Lo que cada uno carga en el panel queda en su navegador, no en el servidor. Los datos de coordinación
+  se importan desde el JSON en Coordinación → Obras, DT y datos.
+- Este repositorio es **público**: el código y la carpeta `datos/` (con nombres y evaluaciones de los DT)
+  los puede ver cualquiera. Para que dejen de verse, pasalo a privado en GitHub (Settings → General →
+  Danger Zone → Change visibility). Con el repositorio privado, el `git pull` del VPS necesita una clave
+  de solo lectura (Deploy key).
+- Las contraseñas y claves van solo en el servidor (Caddyfile y `.env`), nunca en el repositorio.

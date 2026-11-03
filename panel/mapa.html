@@ -1,0 +1,300 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex"></head><body>
+<title>Mapa del sistema de obras</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: cinco columnas que siguen el recorrido de la información (entra → se guarda → se ve → se cruza → sale),
+   cada parte es una ficha con su estado; abajo, la lista de trabajo de la rama. Mismos tokens que el panel. */
+:root {
+  --bg: #f5f4f0; --surface: #ffffff; --surface-2: #efede7; --text: #1d1d1b; --muted: #6c6a63; --line: #e2dfd7;
+  --accent: #1f5c4b; --accent-text: #ffffff; --accent-soft: #dcebe5;
+  --ok: #2f7d4f; --ok-soft: #dcefe2; --warn: #a8660b; --warn-soft: #f8ead2; --off: #8a877f; --off-soft: #ebe9e3;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141513; --surface: #1d1f1c; --surface-2: #262924; --text: #ecebe6; --muted: #a09e96; --line: #33362f;
+    --accent: #6fbfa3; --accent-text: #0e1a16; --accent-soft: #1f3a31;
+    --ok: #7cc795; --ok-soft: #1f3526; --warn: #e4ad5a; --warn-soft: #3a2e19; --off: #8d8a82; --off-soft: #262724;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141513; --surface: #1d1f1c; --surface-2: #262924; --text: #ecebe6; --muted: #a09e96; --line: #33362f;
+  --accent: #6fbfa3; --accent-text: #0e1a16; --accent-soft: #1f3a31;
+  --ok: #7cc795; --ok-soft: #1f3526; --warn: #e4ad5a; --warn-soft: #3a2e19; --off: #8d8a82; --off-soft: #262724;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--text); font: 15px/1.45 var(--font);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 56px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 24px; }
+h1 { font-size: 24px; letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--muted); max-width: 64ch; }
+.rama { font: 12px var(--mono); background: var(--surface-2); padding: 4px 8px; border-radius: 6px; color: var(--muted); }
+h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 0 0 10px; }
+
+.resumen { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.barra { flex: 1 1 260px; height: 10px; border-radius: 99px; background: var(--surface-2); display: flex; overflow: hidden; }
+.barra i { display: block; height: 100%; }
+.barra .h { background: var(--ok); } .barra .c { background: var(--warn); }
+.ley { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip.hecho { background: var(--ok-soft); color: var(--ok); }
+.chip.curso { background: var(--warn-soft); color: var(--warn); }
+.chip.pend { background: var(--surface-2); color: var(--muted); }
+.chip.fuera { background: var(--off-soft); color: var(--off); }
+.chip.fuera::before { background: transparent; border: 1.5px solid currentColor; }
+
+.mapa-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.mapa { display: grid; grid-template-columns: repeat(5, minmax(200px, 1fr)); gap: 0 22px; min-width: 1080px; padding-bottom: 4px; }
+.col { display: flex; flex-direction: column; gap: 8px; position: relative; }
+.col + .col::before {
+  content: "→"; position: absolute; left: -18px; top: 2px; color: var(--muted); font-size: 16px;
+}
+.col h3 { font-size: 13px; margin: 0; letter-spacing: -.01em; }
+.col .sub { font-size: 12px; color: var(--muted); margin: -4px 0 4px; }
+.grupo { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 6px; }
+.nodo {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px;
+  display: flex; flex-direction: column; gap: 4px; min-width: 0;
+}
+.nodo b { font-size: 13.5px; }
+.nodo span.d { font-size: 12px; color: var(--muted); }
+.nodo.curso { border-color: var(--warn); box-shadow: 0 0 0 2px var(--warn-soft); }
+.nodo.fuera { background: transparent; border-style: dashed; }
+.nodo.fuera b { color: var(--muted); }
+.nodo .chip { align-self: flex-start; }
+.ahora { font: 700 11px var(--font); color: var(--warn); text-transform: uppercase; letter-spacing: .06em; }
+
+.grilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; min-width: 0; }
+ol.pasos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+ol.pasos li { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: start; padding: 9px 0; border-bottom: 1px solid var(--line); }
+ol.pasos li:last-child { border-bottom: 0; }
+ol.pasos .n { font: 12px var(--mono); color: var(--muted); padding-top: 2px; font-variant-numeric: tabular-nums; }
+ol.pasos b { font-size: 14px; display: block; }
+ol.pasos span.d { font-size: 12.5px; color: var(--muted); }
+ol.pasos li.curso b { color: var(--warn); }
+.nota { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+.act { font-size: 12px; color: var(--muted); }
+.intro { margin: -4px 0 12px; color: var(--muted); max-width: 70ch; }
+.logica { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr)); gap: 16px; }
+.logica figure { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.logica .ancha { grid-column: 1 / -1; }
+figcaption { display: flex; flex-direction: column; gap: 2px; }
+figcaption b { font-size: 15px; }
+figcaption span { font-size: 13px; color: var(--muted); }
+.diag { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.diag pre { margin: 0; background: transparent; font-family: var(--font); }
+@media (max-width: 640px) { h1 { font-size: 21px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Mapa del sistema de obras</h1>
+      <p>Las partes del sistema, la lógica de cada cálculo y en qué parte estoy trabajando ahora.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+      <span class="rama">rama: integracion-coordinacion</span>
+      <span class="act" id="act"></span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Avance de esta rama</h2>
+    <div class="resumen">
+      <div class="barra" id="barra" role="img"></div>
+      <div class="ley" id="ley"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Partes del sistema</h2>
+    <div class="mapa-scroll"><div class="mapa" id="mapa"></div></div>
+    <p class="nota">En una pantalla angosta, deslizá el mapa hacia el costado. Las fichas con borde punteado no entran en la prueba actual: necesitan el servidor (VPS) o conexiones externas.</p>
+  </section>
+
+  <section>
+    <h2>Lógica del sistema</h2>
+    <p class="intro">Cómo decide el sistema cada resultado. Los números son los de tus datos: meta 70 %, piso de alerta 55 %, pesos de tus planillas.</p>
+    <div class="logica">
+      <figure class="card">
+        <figcaption><b>1. Recorrido de un dato</b><span>Todo pasa por las mismas reglas antes de llegar a la pantalla.</span></figcaption>
+        <div class="diag"><pre class="mermaid">
+flowchart LR
+  A[Reporte del bot] --> G[(Datos de la obra)]
+  B[Carga de oficina] --> G
+  C[JSON de coordinación] --> G
+  G --> R{Reglas de alerta}
+  G --> K{Cálculo de conformidad}
+  R --> S[Semáforo y alertas]
+  K --> T[Resumen del mes y DT]
+  S --> I[Informes]
+  T --> I
+</pre></div>
+      </figure>
+      <figure class="card">
+        <figcaption><b>2. Conformidad de una obra y de un DT</b><span>Igual que en tu app de coordinación.</span></figcaption>
+        <div class="diag"><pre class="mermaid">
+flowchart TD
+  A[Celda de la semana] --> B{¿Corresponde esa semana?}
+  B -- "No: quincenal, mensual" --> X[No cuenta]
+  B -- Sí --> C{¿Está marcada?}
+  C -- "Sin marcar" --> Y[Baja la carga del mes, no el puntaje]
+  C -- "✓ o ✗" --> D["% del bloque = ✓ / marcadas"]
+  D --> E["Conformidad = promedio de bloques ponderado por peso (solo bloques con datos)"]
+  E --> F{Resultado}
+  F -- "70 % o más" --> G1[Conforme]
+  F -- "55 % a 70 %" --> G2[En alerta]
+  F -- "menos de 55 %" --> G3[No conforme]
+  E --> H[DT = promedio de sus obras. Carletto cuenta para los dos]
+</pre></div>
+      </figure>
+      <figure class="card">
+        <figcaption><b>3. Cuándo un desvío es alerta</b><span>Columna Desvíos del semáforo.</span></figcaption>
+        <div class="diag"><pre class="mermaid">
+flowchart TD
+  A[Desvío del registro] --> B{¿Cerrado?}
+  B -- Sí --> N[No alerta]
+  B -- "No: abierto o en curso" --> C{¿Plan de acción vencido?}
+  C -- Sí --> D{¿Prioridad crítica o urgente?}
+  D -- Sí --> R1[Crítico]
+  D -- No --> R2[Rojo]
+  C -- No --> E{¿Prioridad?}
+  E -- Crítica --> R2
+  E -- Urgente --> R3[Amarillo]
+  E -- "Normal o alta" --> N
+</pre></div>
+      </figure>
+      <figure class="card">
+        <figcaption><b>4. Material del cronograma y compras</b><span>Un requerimiento de compra vinculado da el material por pedido.</span></figcaption>
+        <div class="diag"><pre class="mermaid">
+flowchart TD
+  A[Material de una tarea] --> B{¿Pedido cargado o requerimiento de compra vinculado?}
+  B -- "Sí, con llegada" --> R[Recibido]
+  B -- "Sí, sin llegada" --> P[Pedido]
+  B -- No --> L["Fecha límite = inicio de la tarea − plazo de entrega − 2 días hábiles"]
+  L --> V{¿Cuánto falta?}
+  V -- "Vencida" --> X{¿Tarea crítica?}
+  X -- Sí --> C1[Crítico]
+  X -- No --> C2[Rojo]
+  V -- "7 días o menos" --> C3[Amarillo]
+  V -- "Más de 7 días" --> OK[En orden]
+</pre></div>
+      </figure>
+      <figure class="card ancha">
+        <figcaption><b>5. Controles automáticos</b><span>Hecho. El panel propone, vos confirmás o corregís en la carga semanal. Los controles 28 y 24 empiezan a sugerirse cuando el bot mande reportes.</span></figcaption>
+        <div class="diag"><pre class="mermaid">
+flowchart LR
+  R[Reportes diarios del bot] --> C28["28 · Informes diarios: ✓ si reportó todos los días hábiles de la semana"]
+  R --> C24["24 · HyS: ✗ si algún reporte dice EPP incompleto o hubo incidente"]
+  CE[Certificados cargados] --> C27["27 · Certificado mensual: ✓ si se presentó hasta el día 5"]
+  LA[Láminas cargadas] --> C10["10 · Doc. apto obra: ✗ si falta una lámina para una tarea que arranca en 10 días"]
+  C28 --> S[Sugerencia en la grilla]
+  C24 --> S
+  C27 --> S
+  C10 --> S
+  S --> U{Vos}
+  U -- Confirmás --> OK[Queda marcada]
+  U -- Corregís --> OK
+</pre></div>
+      </figure>
+    </div>
+  </section>
+
+  <div class="grilla">
+    <section class="card">
+      <h2>Trabajo de la rama, en orden</h2>
+      <ol class="pasos" id="pasos"></ol>
+    </section>
+    <section class="card">
+      <h2>Qué queda igual</h2>
+      <ol class="pasos" id="igual"></ol>
+      <p class="nota">Tus datos siguen solo en tu navegador. Nada se sube a GitHub hasta que lo confirmes.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+// Estado de cada parte. Se actualiza en cada avance: hecho · curso · pend · fuera
+const ACTUALIZADO = '19 oct 2026, rama terminada';
+const COLUMNAS = [
+  { t: 'Entradas', s: 'De dónde viene la información', nodos: [
+    ['Bot de reporte diario', 'Fotos y audios del DT por chat', 'fuera'],
+    ['Carga de oficina', 'Certificados, láminas, actas, HyS (pestaña Cargar)', 'hecho'],
+    ['Archivo JSON de coordinación', 'Tu app: controles, desvíos, compras', 'hecho'],
+    ['Cronograma de MS Project', 'Exportado a CSV', 'fuera'],
+    ['Tableros de Trello', 'Compras por obra', 'fuera'],
+  ]},
+  { t: 'Guardado', s: 'Dónde quedan los datos', nodos: [
+    ['Navegador (prueba)', 'Solo en tu computadora', 'hecho'],
+    ['Base de datos en el VPS', 'La misma del bot', 'fuera'],
+  ]},
+  { t: 'Panel', s: 'Lo que se ve y se carga', nodos: [
+    ['g', 'Seguimiento de obra'],
+    ['Tablero y semáforo', 'Obra × módulo', 'hecho'],
+    ['Ficha de obra', '11 módulos, Gantt y curva S', 'hecho'],
+    ['DT, alertas e informes', 'Semanal y consolidado', 'hecho'],
+    ['g', 'Coordinación (tu app)'],
+    ['Resumen del mes', 'Conformidad, mapa por bloque, DT', 'hecho'],
+    ['Carga semanal', 'Celdas, observaciones DT/Obra, Todo ✓, informe del mes', 'hecho'],
+    ['Desvíos', 'Registro, formulario, retrabajo y paralización', 'hecho'],
+    ['Indicadores de gestión', 'Anticipados, pendientes, retrabajos, paralizaciones', 'hecho'],
+    ['Compras', 'Indicadores y formulario', 'hecho'],
+    ['Obras, DT y parámetros', 'Altas, asignación, pesos y metas', 'hecho'],
+  ]},
+  { t: 'Cruces', s: 'Lo que une los dos sistemas', nodos: [
+    ['Una sola lista de obras', 'Tus 6 obras y 5 DT en todo el panel, varios DT por obra', 'hecho'],
+    ['Desvíos como alertas', 'Vencidos o críticos entran al semáforo', 'hecho'],
+    ['Controles automáticos', 'Sugiere 27 y 10 con certificados y láminas; 28 y 24 cuando llegue el bot', 'hecho'],
+    ['Compras con materiales', 'Un requerimiento vinculado da el material por pedido', 'hecho'],
+  ]},
+  { t: 'Salidas', s: 'A quién le llega', nodos: [
+    ['Panel en el navegador', 'Prueba publicada', 'hecho'],
+    ['Informe mensual de DT', 'Con texto DT / obra', 'hecho'],
+    ['Mail de resumen diario', 'A la mañana', 'fuera'],
+    ['Aviso por el bot', 'Cuando algo pasa a crítico', 'fuera'],
+  ]},
+];
+const PASOS = [
+  ['Una sola lista de obras', 'Tus obras reemplazan a las ficticias; botón para volver al ejemplo', 'hecho'],
+  ['Desvíos como alertas', 'Columna Desvíos en el semáforo y pestaña en la ficha de obra', 'hecho'],
+  ['Compras con materiales', 'Vínculo requerimiento ↔ material del cronograma', 'hecho'],
+  ['Carga semanal completa', 'Observaciones DT/Obra, Todo ✓, informe del mes, obs. de cada DT', 'hecho'],
+  ['Desvíos y compras editables', 'Nuevo, editar, eliminar; retrabajo y paralización', 'hecho'],
+  ['Indicadores de gestión', 'Por obra y mes, contra el mes anterior', 'hecho'],
+  ['Obras, DT y parámetros', 'Altas, DT por obra, activa, pesos, meta y piso', 'hecho'],
+  ['Controles automáticos', 'Sugerencias para los controles 10, 24, 27 y 28', 'hecho'],
+  ['Prueba completa y publicación', 'Revisar en escritorio y celular, actualizar la demo', 'hecho'],
+];
+const IGUAL = [
+  ['Fórmula de conformidad', 'La misma de tu app: promedio por bloque ponderado', 'hecho'],
+  ['Datos ficticios de ejemplo', 'Siguen disponibles con un botón', 'hecho'],
+];
+const NOMBRE = { hecho: 'Hecho', curso: 'En curso', pend: 'Pendiente', fuera: 'Fuera de la prueba' };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const chip = e => `<span class="chip ${e}">${NOMBRE[e]}</span>`;
+
+document.getElementById('act').textContent = `Actualizado: ${ACTUALIZADO}`;
+document.getElementById('mapa').innerHTML = COLUMNAS.map(c => `<div class="col"><h3>${esc(c.t)}</h3><div class="sub">${esc(c.s)}</div>${
+  c.nodos.map(([t, d, e]) => t === 'g' ? `<div class="grupo">${esc(d)}</div>`
+    : `<div class="nodo ${e}">${e === 'curso' ? '<span class="ahora">Trabajando ahora</span>' : ''}<b>${esc(t)}</b><span class="d">${esc(d)}</span>${chip(e)}</div>`).join('')}</div>`).join('');
+const lista = (id, arr) => { document.getElementById(id).innerHTML = arr.map(([t, d, e], i) =>
+  `<li class="${e}"><span class="n">${String(i + 1).padStart(2, '0')}</span><div><b>${esc(t)}</b><span class="d">${esc(d)}</span></div>${chip(e)}</li>`).join(''); };
+lista('pasos', PASOS);
+lista('igual', IGUAL);
+const h = PASOS.filter(p => p[2] === 'hecho').length, c = PASOS.filter(p => p[2] === 'curso').length, n = PASOS.length;
+const barra = document.getElementById('barra');
+barra.innerHTML = `<i class="h" style="width:${h / n * 100}%"></i><i class="c" style="width:${c / n * 100}%"></i>`;
+barra.setAttribute('aria-label', `${h} de ${n} pasos hechos, ${c} en curso`);
+document.getElementById('ley').innerHTML = `${chip('hecho')} <span class="act">${h} de ${n}</span> ${chip('curso')} <span class="act">${c}</span> ${chip('pend')} <span class="act">${n - h - c}</span>`;
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script><script>mermaid.initialize({ startOnLoad: true, theme: matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default" });</script></body></html>

@@ -1,0 +1,450 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Coordinación de Obras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: encabezado fijo con período y estado de guardado, pestañas por tarea, contenido a ancho de 1200px.
+   Tablero = resumen arriba (4 cifras), obras ordenadas de peor a mejor, mapa por bloque, desempeño por DT. */
+:root{
+  --bg:#e7eaed; --card:#f5f6f8; --ink:#16202a; --ink2:#46535f; --mute:#74818d; --line:#cdd3d9; --line2:#dde1e5;
+  --accent:#1f5fa8; --accent-ink:#ffffff; --accent-soft:#d5e3f3;
+  --good:#2a7a4b; --good-soft:#d6ebdd; --warn:#a96a10; --warn-soft:#f3e4c4; --bad:#b0372b; --bad-soft:#f4d8d4;
+  --f-display:'Barlow Condensed','Arial Narrow',sans-serif; --f-body:'IBM Plex Sans',system-ui,sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11161b; --card:#192027; --ink:#e5eaef; --ink2:#a9b4bf; --mute:#7a8793; --line:#2c3640; --line2:#232c34;
+  --accent:#6aa8ea; --accent-ink:#0d1620; --accent-soft:#1d3347;
+  --good:#5cbb85; --good-soft:#1c3427; --warn:#e2ac4c; --warn-soft:#3a2f17; --bad:#ef8070; --bad-soft:#3e2320; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161b; --card:#192027; --ink:#e5eaef; --ink2:#a9b4bf; --mute:#7a8793; --line:#2c3640; --line2:#232c34;
+  --accent:#6aa8ea; --accent-ink:#0d1620; --accent-soft:#1d3347;
+  --good:#5cbb85; --good-soft:#1c3427; --warn:#e2ac4c; --warn-soft:#3a2f17; --bad:#ef8070; --bad-soft:#3e2320; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45;padding-inline:16px;padding-block:0 40px}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:1200px;margin-inline:auto}
+header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;padding-block:14px 10px}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;min-width:0}
+.brand h1{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:.06em;text-transform:uppercase;margin:0}
+.brand span{color:var(--mute);font-size:12px;letter-spacing:.04em}
+.ctrl{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ctrl label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:8px}
+input[type=month],input[type=date],input[type=number],input[type=text],select,textarea{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:6px 8px;min-width:0}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.save{font-family:var(--f-mono);font-size:11px;color:var(--mute);display:flex;align-items:center;gap:6px}
+.save i{width:7px;height:7px;border-radius:50%;background:var(--mute);display:inline-block}
+.save.ok i{background:var(--good)} .save.err i{background:var(--bad)} .save.saving i{background:var(--warn)}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:18px}
+nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:9px 14px;cursor:pointer;color:var(--ink2);font-weight:500;white-space:nowrap}
+nav.tabs button[aria-current=true]{color:var(--ink);border-bottom-color:var(--accent)}
+h2{font-family:var(--f-display);font-weight:600;font-size:20px;letter-spacing:.05em;text-transform:uppercase;margin:0 0 4px}
+.sub{color:var(--mute);font-size:12.5px;margin:0 0 12px}
+section.blk{margin-block:0 30px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border-block:1px solid var(--line);margin-bottom:28px}
+.stat{padding:14px 16px;border-right:1px solid var(--line2);min-width:0}
+.stat:last-child{border-right:0}
+.stat .k{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.stat .v{font-family:var(--f-display);font-weight:600;font-size:40px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat .d{font-size:12px;color:var(--ink2)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:14px 16px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--mute);font-weight:500;text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line2);vertical-align:middle}
+td.num,th.num{text-align:right}
+tr.click{cursor:pointer} tr.click:hover td{background:var(--accent-soft)}
+.name{font-weight:600}
+.dim{color:var(--mute);font-size:12px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.na{background:var(--line2);color:var(--mute)} .pill.acc{background:var(--accent-soft);color:var(--accent)}
+.bar{position:relative;height:10px;background:var(--line2);border-radius:2px;min-width:90px}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:2px 0 0 2px}
+.bar i.good{background:var(--good)} .bar i.warn{background:var(--warn)} .bar i.bad{background:var(--bad)}
+.bar b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+.cellp{display:flex;align-items:center;gap:10px}
+.cellp .p{font-family:var(--f-mono);font-size:13px;width:38px;text-align:right}
+.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px;margin-bottom:30px}
+@media (max-width:860px){.two{grid-template-columns:minmax(0,1fr)}}
+.heat{display:grid;grid-template-columns:minmax(90px,1.2fr) repeat(8,minmax(44px,1fr));gap:2px;min-width:560px;font-size:12px}
+.heat .h{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute);padding:4px 2px;text-align:center}
+.heat .o{padding:8px 4px 8px 0;font-weight:600;display:flex;align-items:center}
+.heat .c{padding:8px 2px;text-align:center;font-family:var(--f-mono);border-radius:2px}
+.c.good{background:var(--good-soft);color:var(--good)} .c.warn{background:var(--warn-soft);color:var(--warn)} .c.bad{background:var(--bad-soft);color:var(--bad)} .c.na{background:var(--line2);color:var(--mute)}
+.hbars{display:grid;gap:8px}
+.hb{display:grid;grid-template-columns:130px 1fr 28px;align-items:center;gap:8px;font-size:12.5px}
+.hb .t{height:12px;background:var(--line2);border-radius:2px;position:relative}
+.hb .t i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:2px}
+.hb .t i.o{background:var(--bad)}
+.list{display:grid;gap:0}
+.li{padding:9px 0;border-bottom:1px solid var(--line2);display:grid;gap:2px}
+.li:last-child{border-bottom:0}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:3px;padding:7px 14px;font-weight:500;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+.btn.sm{padding:3px 9px;font-size:12px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grid-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 14px;margin-block:10px}
+.grid-f label{display:grid;gap:3px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.grid-f label input,.grid-f label select,.grid-f label textarea{text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink);width:100%}
+.grid-f .wide{grid-column:1/-1}
+/* carga semanal */
+.ck{min-width:720px}
+.ck .bh td{background:var(--accent-soft);font-family:var(--f-display);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:14px;padding:6px 10px}
+.ck td.w{text-align:center;width:64px;padding:4px}
+.cb{width:50px;height:30px;border-radius:3px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:600;font-family:var(--f-mono);color:var(--mute)}
+.cb.y{background:var(--good-soft);color:var(--good);border-color:var(--good)}
+.cb.n{background:var(--bad-soft);color:var(--bad);border-color:var(--bad)}
+.cb[disabled]{opacity:.35;cursor:default;background:var(--line2)}
+.ck input.obs{width:100%;min-width:140px}
+.sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:3;background:var(--bg);padding-block:8px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.empty{padding:26px;text-align:center;color:var(--ink2);border:1px dashed var(--line);border-radius:4px}
+.det td{background:var(--card)}
+.tag{font-family:var(--f-mono);font-size:11px;color:var(--mute)}
+.infrow{display:grid;grid-template-columns:120px minmax(0,1fr) minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--line2)}
+.infrow:last-child{border-bottom:0}
+@media (max-width:760px){.infrow{grid-template-columns:minmax(0,1fr)}}
+.auto{margin:4px 0 6px;padding-left:16px;color:var(--ink2);font-size:13px}
+.dest{width:64px;flex:none}
+.ig td{vertical-align:middle} .ig input[type=number]{width:70px} .ig input[type=text]{width:100%;min-width:150px}
+.ig tr.og td{border-top:2px solid var(--line)}
+.tg{border:1px solid var(--line);background:var(--card);color:var(--mute);border-radius:3px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer;min-width:52px}
+.tg.si{background:var(--bad-soft);color:var(--bad);border-color:var(--bad)}
+.tg.no{background:var(--good-soft);color:var(--good);border-color:var(--good)}
+.num-good{color:var(--good);font-weight:600} .num-bad{color:var(--bad);font-weight:600}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><h1>Coordinación de obras</h1><span id="sum"></span></div>
+    <div class="ctrl">
+      <label>Período <input type="month" id="per" data-act="per"></label>
+      <div class="save" id="save"><i></i><span>Cargando</span></div>
+    </div>
+  </header>
+  <nav class="tabs" id="tabs"></nav>
+  <main id="app"></main>
+</div>
+
+<script>
+//#LOGIC-START
+const ITEMS=[{"n": 1, "b": "PLANIFICACION", "t": "Cumplimiento de Hitos Mensuales", "ins": "CALENDARIO", "fr": "QUINCENAL"}, {"n": 2, "b": "PLANIFICACION", "t": "Gantt actualizado", "ins": "GANTT", "fr": "MENSUAL"}, {"n": 3, "b": "PLANIFICACION", "t": "Planificación y seguimiento semanal (Minuta semanal)", "ins": "ITEMIZADO", "fr": "SEMANAL"}, {"n": 4, "b": "PLANIFICACION", "t": "Detección temprana de desvíos", "ins": "DISCORD / ITEMIZADO", "fr": "EVENTUAL"}, {"n": 5, "b": "PLANIFICACION", "t": "Plan de acción ante desvíos", "ins": "DISCORD", "fr": "EVENTUAL"}, {"n": 6, "b": "COORDINACION", "t": "Coordinación de gremios y contratistas", "ins": "DISCORD", "fr": "SEMANAL"}, {"n": 7, "b": "COORDINACION", "t": "Coordinación de tareas entre rubros", "ins": "ITEMIZADO", "fr": "SEMANAL"}, {"n": 8, "b": "COORDINACION", "t": "Seguimiento de pendientes", "ins": "ITEMIZADO", "fr": "SEMANAL"}, {"n": 9, "b": "COORDINACION", "t": "Resolución / seguimiento de interferencias", "ins": "DISCORD", "fr": "SEMANAL"}, {"n": 10, "b": "DOCUMENTACION", "t": "Gestión doc. Tec. disponible y actualizada APTO OBRA", "ins": "PLANILLA", "fr": "SEMANAL"}, {"n": 11, "b": "DOCUMENTACION", "t": "Actualización de documentación de obra", "ins": "PLANO / REGISTRO", "fr": "SEMANAL"}, {"n": 12, "b": "DOCUMENTACION", "t": "Gestión permisos municipales y administrativos de obra", "ins": "CHECK LIST", "fr": "SEMANAL"}, {"n": 13, "b": "DOCUMENTACION", "t": "Gestión de Documentación técnica", "ins": "PLANO / REGISTRO", "fr": "SEMANAL"}, {"n": 14, "b": "DOCUMENTACION", "t": "Libro de Ordenes de servicio / Nota de Pedido", "ins": "LIBRO", "fr": "SEMANAL"}, {"n": 15, "b": "MATERIALES", "t": "Gestión y cierre de Requerimientos de compras", "ins": "TRELLO", "fr": "SEMANAL"}, {"n": 16, "b": "MATERIALES", "t": "Previsión y pedido de materiales", "ins": "TRELLO", "fr": "SEMANAL"}, {"n": 17, "b": "MATERIALES", "t": "Recepción, Stock y Faltantes de materiales", "ins": "PLANILLA", "fr": "SEMANAL"}, {"n": 18, "b": "MATERIALES", "t": "Control de calidad de materiales (check list, ensayos, etc, s/ corresponda)", "ins": "CHECK LIST", "fr": "SEMANAL"}, {"n": 19, "b": "MATERIALES", "t": "Verificación cómputos de materiales de contratistas", "ins": "PLANILLA", "fr": "SEMANAL"}, {"n": 20, "b": "CALIDAD", "t": "Control de calidad de EJECUCION DE TRABAJOS", "ins": "CHECK LIST", "fr": "SEMANAL"}, {"n": 21, "b": "CALIDAD", "t": "Detección / prevención de retrabajos", "ins": "CHECK LIST", "fr": "SEMANAL"}, {"n": 22, "b": "CALIDAD", "t": "Recepción de trabajos ejecutados", "ins": "ACTA / CHECK LIST", "fr": "SEMANAL"}, {"n": 23, "b": "HyS. Y OBRA", "t": "Layout de obra (Acceso, Descargas, Camineras, Acopio, Bº, etc.)", "ins": "CROQUIS", "fr": "MENSUAL"}, {"n": 24, "b": "HyS. Y OBRA", "t": "Control (EPP, Ord. y Limp., Trab. Altura, Riesgo Elect., Registro desvíos)", "ins": "CHECK LIST/ DISCORD", "fr": "SEMANAL"}, {"n": 25, "b": "ADMINISTRACION", "t": "Medición de Certificados quincenales Contratista", "ins": "PLANILLA", "fr": "QUINCENAL"}, {"n": 26, "b": "ADMINISTRACION", "t": "Gestión de cambios y adicionales", "ins": "PLANILLA", "fr": "EVENTUAL"}, {"n": 27, "b": "ADMINISTRACION", "t": "Medición de certificados Mensuales p/ cliente", "ins": "PLANILLA", "fr": "MENSUAL"}, {"n": 28, "b": "REPORTING", "t": "Informes diarios internos", "ins": "DISCORD", "fr": "DIARIO"}, {"n": 29, "b": "REPORTING", "t": "Informes SEMANAL p/ Cliente", "ins": "INFORME PDF", "fr": "SEMANAL"}, {"n": 30, "b": "REPORTING", "t": "Informe fotográfico y de avance MENSUAL P/ Cliente", "ins": "INFORME PDF", "fr": "MENSUAL"}];
+const BLOCKS=[['PLANIFICACION','Planificación'],['COORDINACION','Coordinación'],['DOCUMENTACION','Documentación'],['MATERIALES','Materiales'],['CALIDAD','Calidad'],['HyS. Y OBRA','HyS y obra'],['ADMINISTRACION','Administración'],['REPORTING','Reporting']];
+const TIPOS=['Normativo','Técnico','Coordinación interna','Cliente','Proveedores','Condiciones del sitio'];
+const ESTADOS=['abierto','en curso','cerrado'];
+const PRIOS=['normal','alta','urgente','crítico'];
+const IND=[['desvios','Desvíos detectados anticipadamente'],['pendientes','Pendientes cerrados'],['retrabajos','Retrabajos'],['paralizaciones','Paralizaciones evitables']];
+function defaultState(){return{v:1,
+  cfg:{meta:.8,alerta:.6,w:{PLANIFICACION:.15,COORDINACION:.15,DOCUMENTACION:.15,MATERIALES:.15,CALIDAD:.15,'HyS. Y OBRA':.05,ADMINISTRACION:.10,REPORTING:.10}},
+  dts:[{id:'fm',nombre:'Federico Marti'},{id:'fp',nombre:'Federico Periotti'},{id:'sv',nombre:'Sergio Villalba'},{id:'fr',nombre:'Florencia Ruiz'},{id:'nb',nombre:'Nahuel Bejarano'}],
+  obras:[{id:'MZ',nombre:'Martínez Zuccardi',dts:['fm'],activa:true},{id:'EF',nombre:'Eglof (EF LP16)',dts:['fp'],activa:true},{id:'TPL',nombre:'Acceso Terminal Panamericana Logística',dts:['sv'],activa:true},{id:'PRC',nombre:'Poviña · San Pablo Country',dts:['fr'],activa:true},{id:'CE',nombre:'Carletto',dts:['fp','nb'],activa:true},{id:'SYB',nombre:'Shopping YB',dts:['fr'],activa:true},{id:'RM-T',nombre:'RM-T (obra finalizada)',dts:[],activa:false}],
+  checks:{},inf:{},desvios:[],compras:[],obsDT:{}}}
+const pad=n=>String(n).padStart(2,'0');
+const isoToday=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+function isoWeek(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-day);const y0=new Date(Date.UTC(t.getUTCFullYear(),0,1));return Math.ceil(((t-y0)/864e5+1)/7)}
+function weeksOf(per){const [y,m]=per.split('-').map(Number);const out=[];const last=new Date(y,m,0).getDate();for(let d=1;d<=last;d++){const dt=new Date(y,m-1,d);if(dt.getDay()===1){const e=new Date(y,m-1,d+6);out.push({n:isoWeek(dt),label:d+'–'+e.getDate()+(e.getMonth()!==m-1?'/'+(e.getMonth()+1):'')})}}return out}
+function prevPer(per){const [y,m]=per.split('-').map(Number);const d=new Date(y,m-2,1);return d.getFullYear()+'-'+pad(d.getMonth()+1)}
+const appl=(it,wi)=>it.fr==='QUINCENAL'?wi%2===0:it.fr==='MENSUAL'?wi===0:true;
+function score(S,obra,per){
+  const ck=(S.checks[obra+'|'+per]||{}).i||{};const W=weeksOf(per);const bl={};
+  BLOCKS.forEach(b=>bl[b[0]]={cap:0,ev:0,ok:0,pct:null});
+  const wk=W.map(()=>({ev:0,ok:0}));
+  ITEMS.forEach(it=>{const row=ck[it.n]||[];W.forEach((_,wi)=>{if(appl(it,wi))bl[it.b].cap++;const v=row[wi];if(v===0||v===1){bl[it.b].ev++;if(v)bl[it.b].ok++;wk[wi].ev++;if(v)wk[wi].ok++}})});
+  let sw=0,sp=0,cap=0,ev=0;
+  BLOCKS.forEach(([k])=>{const b=bl[k];b.pct=b.ev?b.ok/b.ev:null;cap+=b.cap;ev+=b.ev;if(b.pct!==null){sw+=S.cfg.w[k];sp+=S.cfg.w[k]*b.pct}});
+  return{bl,pct:sw?sp/sw:null,carga:cap?Math.min(1,ev/cap):0,wk:wk.map(x=>x.ev?x.ok/x.ev:null),ev}}
+const stat=(S,p)=>p==null?'na':p>=S.cfg.meta?'good':p>=S.cfg.alerta?'warn':'bad';
+const vencido=d=>d.estado!=='cerrado'&&d.fechaPA&&d.fechaPA<isoToday();
+const diasEntre=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
+function compra(c){const ciclo=c.fin?diasEntre(c.inicio,c.fin):null;const transc=!c.fin&&c.inicio?diasEntre(c.inicio,isoToday()):null;
+  const ex=(c.entregados!=null&&c.pedidos)?c.entregados/c.pedidos:null;const ah=(c.pIni&&c.pCompra)?(c.pIni-c.pCompra)/c.pIni:null;return{ciclo,transc,ex,ah}}
+const avg=a=>{a=a.filter(x=>x!=null);return a.length?a.reduce((s,x)=>s+x,0)/a.length:null};
+function dtObras(S,id){return S.obras.filter(o=>o.activa&&o.dts.includes(id))}
+function dtStats(S,id,per){
+  const os=dtObras(S,id);const sc=os.map(o=>score(S,o.id,per));const pv=os.map(o=>score(S,o.id,prevPer(per)).pct);
+  const ind={desvios:0,pendientes:0,retrabajos:0,paralizaciones:0};const ver={};let hasInd=false;
+  os.forEach(o=>{IND.forEach(([k])=>{const v=indVal(S,o.id,per,k);if(v.dt!=null){ind[k]+=v.dt;hasInd=true}})});
+  IND.forEach(([k])=>{let cur=0,prv=0,has=false,hp=false;os.forEach(o=>{const v=indVal(S,o.id,per,k),q=indVal(S,o.id,prevPer(per),k);if(v.dt!=null){cur+=v.dt;has=true}if(q.dt!=null){prv+=q.dt;hp=true}});ver[k]=has&&hp?verdict(k,cur,prv):'na'});
+  const ids=os.map(o=>o.id);const ds=S.desvios.filter(d=>ids.includes(d.obra)&&d.estado!=='cerrado');
+  const bl={};BLOCKS.forEach(([k])=>bl[k]=avg(sc.map(s=>s.bl[k].pct)));
+  return{os,sc,pct:avg(sc.map(s=>s.pct)),prev:avg(pv),carga:avg(sc.map(s=>s.carga)),ind,ver,hasInd,abiertos:ds.length,venc:ds.filter(vencido).length,bl}}
+const OBJ={desvios:'asc',pendientes:'asc',retrabajos:'desc',paralizaciones:'desc'};
+const monthOf=d=>(d||'').slice(0,7);
+function migrate(X){const D=defaultState();X=Object.assign(D,X);X.obsDT=X.obsDT||{};
+  Object.values(X.checks).forEach(c=>{c.i=c.i||{};c.o=c.o||{};c.d=c.d||{}});
+  Object.values(X.inf).forEach(x=>{x.txt=x.txt||{};x.ind=x.ind||{};IND.forEach(([k])=>{const v=x.ind[k];if(typeof v==='number')x.ind[k]={dt:v};else if(v===null||v===undefined)delete x.ind[k]})});
+  return X}
+function indVal(S,obra,per,k){
+  const e=(((S.inf[obra+'|'+per]||{}).ind)||{})[k]||{};
+  let dt=typeof e.dt==='number'?e.dt:null,total=typeof e.total==='number'?e.total:null,auto=false;
+  if(k==='desvios'){const reg=S.desvios.filter(d=>d.obra===obra&&monthOf(d.fecha)===per);
+    if(dt==null&&reg.length){dt=reg.filter(d=>d.detecta==='DT').length;auto=true}
+    if(total==null&&dt!=null){total=Math.max(reg.length,dt);auto=true}}
+  let resp=e.resp||'';
+  if(k==='retrabajos'||k==='paralizaciones'){const f=k==='retrabajos'?'retrab':'paral';const mes=S.desvios.filter(d=>d.obra===obra&&monthOf(d.fecha)===per);
+    if(mes.some(d=>d[f])){dt=mes.filter(d=>d[f]==='si').length;auto=true}
+    if(k==='retrabajos'&&!resp)resp=[...new Set(mes.filter(d=>d.retrab==='si').map(d=>d.resp).filter(Boolean))].join(', ')}
+  return{dt,total,res:(dt!=null&&total)?dt/total:null,resp,obs:e.obs||'',auto}}
+function verdict(k,cur,prev){if(cur==null||prev==null)return 'na';const d=cur-prev;
+  if(OBJ[k]==='asc')return d>0?'good':d<0?'bad':'na';
+  return d<0?'good':d>0?'bad':(cur===0?'good':'na')}
+function autoObs(S,obra,per,blockKey,dest){const c=S.checks[obra+'|'+per];if(!c)return [];
+  const man=(((S.inf[obra+'|'+per]||{}).txt)||{})[blockKey]||{};const txt=(man[dest]||'').toLowerCase();
+  return ITEMS.filter(it=>it.b===blockKey&&c.o&&c.o[it.n]&&((c.d&&c.d[it.n])||'dt')===dest).map(it=>c.o[it.n]).filter(t=>!txt.includes(t.toLowerCase()))}
+function gaps(S,obra,per){const g=[];const c=S.checks[obra+'|'+per];const sc=score(S,obra,per);
+  if(!c||sc.ev===0){g.push('Sin controles cargados');return g}
+  if(sc.carga<0.999)g.push('Falta cargar '+Math.round((1-sc.carga)*100)+'% de los controles');
+  const sin=ITEMS.filter(it=>(c.i[it.n]||[]).includes(0)&&!(c.o&&c.o[it.n]));if(sin.length)g.push(sin.length+' controles no cumplidos sin observación');
+  const inf=S.inf[obra+'|'+per]||{};const hasTxt=Object.values(inf.txt||{}).some(t=>(t.dt||'').trim()||(t.obra||'').trim())||Object.keys(c.o||{}).length>0;
+  if(!hasTxt)g.push('Informe del mes vacío');
+  const miss=IND.filter(([k])=>indVal(S,obra,per,k).dt==null);if(miss.length)g.push('Indicadores sin cargar: '+miss.map(m=>m[1].split(' ')[0].toLowerCase()).join(', '));
+  const rt=indVal(S,obra,per,'retrabajos');if(rt.dt>0&&!rt.resp)g.push('Retrabajos sin responsable');
+  const ab=S.desvios.filter(d=>d.obra===obra&&d.estado!=='cerrado');const sp=ab.filter(d=>!d.fechaPA||!d.resp).length;if(sp)g.push(sp+' desvíos abiertos sin fecha de plan o responsable');
+  return g}
+//#LOGIC-END
+
+let S=defaultState(),db=null,dl=null,saveT=null,dbReady=false,lastAt=0;
+const ui={tab:'tablero',per:'',obra:'MZ',open:null,form:null,fDes:{obra:'',estado:'',tipo:''},fCom:{obra:'',per:''},inf:false,imp:null,msg:''};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pc=p=>p==null?'–':Math.round(p*100)+'%';
+const fd=s=>s?s.slice(8,10)+'/'+s.slice(5,7):'–';
+const money=n=>n==null?'–':'$ '+Math.round(n).toLocaleString('es-AR');
+const obraN=id=>(S.obras.find(o=>o.id===id)||{nombre:id}).nombre;
+const dtN=id=>(S.dts.find(d=>d.id===id)||{nombre:id}).nombre;
+const SL={good:'Conforme',warn:'En alerta',bad:'No conforme',na:'Sin datos'};
+const pill=(s,t)=>`<span class="pill ${s}">${esc(t||SL[s])}</span>`;
+const activas=()=>S.obras.filter(o=>o.activa);
+const monthsWithData=()=>[...new Set(Object.keys(S.checks).map(k=>k.split('|')[1]))].sort();
+
+function setStatus(k){const el=document.getElementById('save');el.className='save '+k;el.querySelector('span').textContent={ok:'Guardado',saving:'Guardando…',err:'No se pudo guardar',local:'Guardado solo en este navegador',load:'Cargando'}[k]||''}
+function persist(){setStatus('saving');clearTimeout(saveT);saveT=setTimeout(async()=>{saveT=null;const json=JSON.stringify(S);try{localStorage.setItem('co_state',json)}catch(e){}
+  if(db){if(!dbReady){setStatus('err');return}try{const at=Date.now();lastAt=at;await db.doc('app/state').set({json,at});setStatus('ok')}catch(e){setStatus('err')}}else setStatus('local')},500)}
+function keep(){const y=scrollY;render();scrollTo(0,y)}
+
+/* ---------- Tablero ---------- */
+function spark(vals){const pts=vals.map((v,i)=>v==null?null:[i,v]).filter(Boolean);if(pts.length<1)return '<span class="dim">–</span>';
+  const w=84,h=26,n=Math.max(vals.length-1,1);const xy=pts.map(([i,v])=>[4+(w-8)*i/n,h-4-(h-8)*v]);
+  const pl=xy.length>1?`<polyline points="${xy.map(p=>p.join(',')).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`:'';
+  const last=xy[xy.length-1];return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Evolución semanal"><line x1="4" x2="${w-4}" y1="${h-4-(h-8)*S.cfg.meta}" y2="${h-4-(h-8)*S.cfg.meta}" stroke="var(--line)" stroke-dasharray="2 2"/>${pl}<circle cx="${last[0]}" cy="${last[1]}" r="3" fill="var(--accent)" stroke="var(--card)" stroke-width="2"/></svg>`}
+function bar(p){const s=stat(S,p);return `<div class="cellp"><div class="bar" title="Meta ${pc(S.cfg.meta)}"><i class="${s}" style="width:${p==null?0:Math.round(p*100)}%"></i><b style="left:${S.cfg.meta*100}%"></b></div><span class="p">${pc(p)}</span></div>`}
+function weakest(sc){let m=null;BLOCKS.forEach(([k,n])=>{const p=sc.bl[k].pct;if(p!=null&&(!m||p<m.p))m={p,n}});return m?`${m.n} ${pc(m.p)}`:'–'}
+function viewTablero(){
+  const per=ui.per,os=activas();const rows=os.map(o=>({o,sc:score(S,o.id,per),ds:S.desvios.filter(d=>d.obra===o.id&&d.estado!=='cerrado')}));
+  const withData=rows.filter(r=>r.sc.pct!=null);
+  if(!withData.length&&!S.desvios.length)return `<div class="empty">No hay datos cargados para ${esc(per)}. Cargá la primera semana en la pestaña <b>Carga semanal</b> y el tablero se completa solo.</div>`;
+  const avgP=avg(withData.map(r=>r.sc.pct));const bajo=withData.filter(r=>r.sc.pct<S.cfg.meta).length;
+  const ab=S.desvios.filter(d=>d.estado!=='cerrado'&&activas().some(o=>o.id===d.obra));const ve=ab.filter(vencido);
+  const cm=compraMes(null);
+  rows.sort((a,b)=>(a.sc.pct??2)-(b.sc.pct??2));
+  let h=`<div class="stats">
+   <div class="stat"><div class="k">Conformidad media</div><div class="v">${pc(avgP)}</div><div class="d">Meta ${pc(S.cfg.meta)} · ${withData.length} de ${os.length} obras con datos</div></div>
+   <div class="stat"><div class="k">Obras bajo la meta</div><div class="v">${bajo}</div><div class="d">${withData.length?withData.filter(r=>r.sc.pct<S.cfg.alerta).length+' en no conforme':'Sin datos en el período'}</div></div>
+   <div class="stat"><div class="k">Desvíos abiertos</div><div class="v">${ab.length}</div><div class="d">${ve.length} con plan de acción vencido</div></div>
+   <div class="stat"><div class="k">Compras · exactitud</div><div class="v">${pc(cm.ex)}</div><div class="d">${cm.n?`${cm.n} req. · ciclo medio ${cm.ciclo==null?'–':cm.ciclo.toFixed(1)+' días'} · ${esc(cm.label)}`:'Sin requerimientos cargados'}</div></div></div>`;
+  h+=`<section class="blk"><h2>Obras</h2><p class="sub">De la más baja a la más alta. La marca vertical es la meta. Tocá una fila para cargar o corregir la obra.</p><div class="panel scroll"><table style="min-width:820px"><thead><tr><th>Obra</th><th>DT</th><th>Conformidad</th><th>Semanas</th><th>Carga</th><th>Bloque más bajo</th><th class="num">Desv.</th><th class="num">Venc.</th><th>Estado</th></tr></thead><tbody>`;
+  rows.forEach(({o,sc,ds})=>{h+=`<tr class="click" data-act="goobra" data-id="${esc(o.id)}"><td><div class="name">${esc(o.nombre)}</div><div class="tag">${esc(o.id)}</div></td><td>${o.dts.map(dtN).map(esc).join('<br>')||'–'}</td><td>${bar(sc.pct)}</td><td>${spark(sc.wk)}</td><td class="tag">${pc(sc.carga)}</td><td class="dim">${esc(weakest(sc))}</td><td class="num">${ds.length}</td><td class="num">${ds.filter(vencido).length||'–'}</td><td>${pill(stat(S,sc.pct))}</td></tr>`});
+  h+=`</tbody></table></div></section>`;
+  // heatmap + desvíos
+  h+=`<div class="two"><section><h2>Mapa por bloque</h2><p class="sub">% de controles cumplidos en el mes.</p><div class="panel scroll"><div class="heat"><div class="h"></div>${BLOCKS.map(b=>`<div class="h">${esc(b[1].slice(0,5))}.</div>`).join('')}`;
+  rows.forEach(({o,sc})=>{h+=`<div class="o">${esc(o.id)}</div>`+BLOCKS.map(([k])=>{const p=sc.bl[k].pct;return `<div class="c ${stat(S,p)}">${p==null?'–':Math.round(p*100)}</div>`}).join('')});
+  h+=`</div></div></section><section><h2>Desvíos abiertos por tipo</h2><p class="sub">Rojo: con plan de acción vencido.</p><div class="panel"><div class="hbars">`;
+  const mx=Math.max(1,...TIPOS.map(t=>ab.filter(d=>d.tipo===t).length));
+  TIPOS.forEach(t=>{const l=ab.filter(d=>d.tipo===t);const v=l.filter(vencido).length;h+=`<div class="hb"><span>${esc(t)}</span><div class="t"><i style="width:${l.length/mx*100}%"></i><i class="o" style="width:${v/mx*100}%"></i></div><span class="tag">${l.length}</span></div>`});
+  h+=`</div></div></section></div>`;
+  // vencidos
+  const crit=ab.filter(d=>vencido(d)||d.prio==='urgente'||d.prio==='crítico').sort((a,b)=>(a.fechaPA||'9').localeCompare(b.fechaPA||'9'));
+  h+=`<section class="blk"><h2>Para resolver primero</h2><p class="sub">Desvíos abiertos con plan vencido o prioridad urgente/crítica.</p><div class="panel"><div class="list">`+(crit.length?crit.slice(0,8).map(d=>`<div class="li"><div class="row"><span class="name">${esc(d.obra)}</span><span>${esc(d.evento)}</span>${vencido(d)?pill('bad','Vencido '+fd(d.fechaPA)):''}${pill(d.prio==='urgente'||d.prio==='crítico'?'bad':'acc',d.prio||'normal')}</div><div class="dim">${esc(d.plan||'Sin plan de acción')}${d.resp?' · Resp. '+esc(d.resp):''}</div></div>`).join(''):'<div class="dim">Nada vencido ni urgente.</div>')+`</div></div></section>`;
+  const gp=os.map(o=>({o,g:gaps(S,o.id,per)})).filter(x=>x.g.length);
+  h+=`<section class="blk"><h2>Qué falta completar</h2><p class="sub">Revisión automática de ${esc(per)}: datos que conviene cargar para que los indicadores sean confiables. Tocá una obra para ir a cargarla.</p><div class="panel"><div class="list">`+(gp.length?gp.map(x=>`<div class="li" style="cursor:pointer" data-act="goobra" data-id="${esc(x.o.id)}"><span class="name">${esc(x.o.nombre)}</span><div class="row">${x.g.map(t=>`<span class="pill warn">${esc(t)}</span>`).join('')}</div></div>`).join(''):'<div class="dim">Todo completo.</div>')+`</div></div></section>`;
+  // DT
+  h+=`<section class="blk"><h2>Desempeño de los DT</h2><p class="sub">Promedio de las obras que dirige cada DT en ${esc(per)}. Carletto lo comparten dos DT: el resultado de la obra cuenta para ambos.</p><div class="panel scroll"><table style="min-width:900px"><thead><tr><th>DT</th><th>Obras</th><th>Conformidad</th><th class="num">vs mes ant.</th><th>Carga</th><th class="num" title="Desvíos detectados anticipadamente">Antic.</th><th class="num" title="Pendientes cerrados">Pend.</th><th class="num">Retrab.</th><th class="num">Paral.</th><th class="num">Desv. abiertos</th><th>Estado</th><th>Observación</th></tr></thead><tbody>`;
+  const dts=S.dts.map(d=>({d,s:dtStats(S,d.id,per)})).sort((a,b)=>(a.s.pct??2)-(b.s.pct??2));
+  dts.forEach(({d,s})=>{const dl=(s.pct!=null&&s.prev!=null)?Math.round((s.pct-s.prev)*100):null;
+    h+=`<tr class="click" data-act="dtopen" data-id="${esc(d.id)}"><td class="name">${esc(d.nombre)}</td><td class="tag">${s.os.map(o=>esc(o.id)).join(' · ')||'–'}</td><td>${bar(s.pct)}</td><td class="num">${dl==null?'–':(dl>0?'+':'')+dl+' pp'}</td><td class="tag">${pc(s.carga)}</td>${IND.map(([k])=>`<td class="num">${s.hasInd?`<span class="${s.ver[k]==='good'?'num-good':s.ver[k]==='bad'?'num-bad':''}">${s.ind[k]}</span>`:'–'}</td>`).join('')}<td class="num">${s.abiertos}${s.venc?` <span class="pill bad">${s.venc} venc.</span>`:''}</td><td>${pill(stat(S,s.pct))}</td><td style="min-width:220px"><textarea rows="2" id="od_${esc(d.id)}" data-act="obsdt" data-id="${esc(d.id)}" placeholder="Observación del DT" style="width:100%">${esc((S.obsDT[per]||{})[d.id]||'')}</textarea></td></tr>`;
+    if(ui.open===d.id)h+=`<tr class="det"><td colspan="12">${dtDetail(d,s,per)}</td></tr>`});
+  h+=`<tr><td colspan="2" class="name">Observaciones generales<div class="dim">Para todos los DT</div></td><td colspan="10"><textarea rows="2" id="od__gral" data-act="obsdt" data-id="_gral" placeholder="Observación general referida a todos los DT" style="width:100%">${esc((S.obsDT[per]||{})._gral||'')}</textarea></td></tr>`;
+  h+=`</tbody></table></div><p class="dim">Verde o rojo en los indicadores: tendencia contra el mes anterior según el objetivo de cada uno.</p></section>`;
+  return h}
+function dtDetail(d,s,per){let h=`<div class="row" style="margin-bottom:8px">`+BLOCKS.map(([k,n])=>`<span class="pill ${stat(S,s.bl[k])}">${esc(n)} ${pc(s.bl[k])}</span>`).join('')+`</div>`;
+  s.os.forEach(o=>{const ck=(S.checks[o.id+'|'+per]||{});const fails=ITEMS.filter(it=>(ck.i&&ck.i[it.n]||[]).includes(0));
+    h+=`<div class="name" style="margin-top:6px">${esc(o.nombre)}</div>`+(fails.length?`<ul style="margin:4px 0 6px;padding-left:18px">`+fails.map(it=>`<li>${esc(it.t)}${ck.o&&ck.o[it.n]?` <span class="dim">— ${esc(ck.o[it.n])}</span>`:''}</li>`).join('')+`</ul>`:`<div class="dim">Sin incumplimientos registrados.</div>`)});
+  return h}
+function compraMes(per){let list=S.compras;let label='todos los períodos';
+  if(per){list=list.filter(c=>(c.fin||c.inicio||'').slice(0,7)===per);label=per}
+  else{const ms=[...new Set(S.compras.map(c=>(c.fin||c.inicio||'').slice(0,7)))].sort();const m=ms[ms.length-1];if(m){list=S.compras.filter(c=>(c.fin||c.inicio||'').slice(0,7)===m);label=m}}
+  const k=list.map(compra);return{n:list.length,ex:avg(k.map(x=>x.ex)),ciclo:avg(k.map(x=>x.ciclo)),ah:avg(k.map(x=>x.ah)),label}}
+
+/* ---------- Carga semanal ---------- */
+function viewCarga(){
+  const o=S.obras.find(x=>x.id===ui.obra)||activas()[0];const per=ui.per,W=weeksOf(per);const key=o.id+'|'+per;
+  const ck=(S.checks[key]||{i:{},o:{}});const sc=score(S,o.id,per);
+  let h=`<div class="sticky"><div class="row" style="justify-content:space-between"><div class="row"><label class="tag">OBRA <select data-act="obra" id="obraSel">${activas().map(x=>`<option value="${esc(x.id)}" ${x.id===o.id?'selected':''}>${esc(x.nombre)}</option>`).join('')}</select></label><span class="dim">DT: ${o.dts.map(dtN).join(', ')||'–'}</span></div><div class="row"><span class="stat"><span class="v" style="font-size:28px">${pc(sc.pct)}</span></span>${pill(stat(S,sc.pct))}<span class="tag">Cargado ${pc(sc.carga)}</span></div></div></div>`;
+  if(!W.length)return h+'<div class="empty">Este mes no tiene lunes cargables.</div>';
+  h+=`<p class="sub">Tocá una celda: vacío → ✓ cumple → ✗ no cumple → vacío. Las celdas apagadas no corresponden a esa semana según la frecuencia del control.</p><div class="panel scroll"><table class="ck"><thead><tr><th>Control</th><th>Frec.</th>${W.map((w,wi)=>`<th style="text-align:center">S${w.n}<div class="tag" style="text-transform:none">${w.label}</div><button class="btn ghost sm" data-act="colok" data-w="${wi}" title="Marca cumple en los controles vacíos de la semana">Todo ✓</button></th>`).join('')}<th>Observación y a quién se refiere</th></tr></thead><tbody>`;
+  BLOCKS.forEach(([k,n])=>{const b=sc.bl[k];h+=`<tr class="bh"><td colspan="${W.length+3}">${esc(n)} <span class="tag" style="margin-left:8px">${pc(b.pct)} · peso ${Math.round(S.cfg.w[k]*100)}%</span></td></tr>`;
+    ITEMS.filter(it=>it.b===k).forEach(it=>{const row=ck.i[it.n]||[];h+=`<tr><td>${esc(it.t)}<div class="tag">${esc(it.ins||'')}</div></td><td class="tag">${esc((it.fr||'').slice(0,4))}</td>`+W.map((_,wi)=>{const v=row[wi];const on=appl(it,wi)||v===0||v===1;return `<td class="w"><button class="cb ${v===1?'y':v===0?'n':''}" data-act="cell" data-n="${it.n}" data-w="${wi}" ${on?'':'disabled'} aria-label="${esc(it.t)} semana ${W[wi].n}">${v===1?'✓':v===0?'✗':on?'·':'–'}</button></td>`}).join('')+`<td><div class="row" style="flex-wrap:nowrap"><select class="dest" id="dest${it.n}" data-act="odest" data-n="${it.n}" aria-label="Referido a" title="¿La observación se refiere a la DT o a la obra/proyecto?"><option value="dt" ${((ck.d||{})[it.n]||'dt')==='dt'?'selected':''}>DT</option><option value="obra" ${(ck.d||{})[it.n]==='obra'?'selected':''}>Obra</option></select><input class="obs" type="text" id="obs${it.n}" data-act="obs" data-n="${it.n}" value="${esc((ck.o||{})[it.n]||'')}" placeholder="Observación"></div></td></tr>`})});
+  h+=`</tbody></table></div>`;
+  h+=`<section class="blk" style="margin-top:24px" id="informeBox">${informeHTML(o,per)}</section>`;
+  return h}
+function informeHTML(o,per){const inf=(S.inf[o.id+'|'+per]||{txt:{}});
+  let h=`<h2>Informe del mes</h2><p class="sub">Las observaciones de los controles se ubican solas según elijas DT u Obra en cada fila. Sumá observaciones adicionales en cada bloque. Los indicadores del mes se cargan en la pestaña Desvíos.</p><div class="panel">`;
+  BLOCKS.forEach(([k,n])=>{const t=(inf.txt&&inf.txt[k])||{};
+    const col=(dest,lab)=>{const au=autoObs(S,o.id,per,k,dest);return `<div style="min-width:0"><div class="tag" style="text-transform:uppercase;letter-spacing:.05em">${lab}</div>${au.length?`<ul class="auto">${au.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}<textarea rows="2" id="t${dest}_${esc(k)}" data-act="txt" data-b="${esc(k)}" data-f="${dest}" placeholder="Observación adicional" style="width:100%">${esc(t[dest]||'')}</textarea></div>`};
+    h+=`<div class="infrow"><div class="name">${esc(n)}</div>${col('dt','Referido a la DT')}${col('obra','Referido a la obra / proyecto')}</div>`});
+  return h+`</div>`}
+/* ---------- Desvíos ---------- */
+function viewDesvios(){
+  const f=ui.fDes;let list=S.desvios.filter(d=>(!f.obra||d.obra===f.obra)&&(!f.estado||d.estado===f.estado)&&(!f.tipo||d.tipo===f.tipo)).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  const ab=S.desvios.filter(d=>d.estado!=='cerrado');
+  let h=`<div class="row" style="justify-content:space-between;margin-bottom:10px"><div><h2>Registro de desvíos</h2><p class="sub" style="margin:0">${ab.length} abiertos · ${ab.filter(vencido).length} vencidos · ${S.desvios.length} en total</p></div><button class="btn" data-act="newdes">+ Nuevo desvío</button></div>`;
+  if(ui.form&&ui.form.kind==='desvio')h+=formDesvio();
+  h+=`<div class="row" style="margin-bottom:10px"><select id="fdo" data-act="fdes" data-k="obra"><option value="">Todas las obras</option>${S.obras.map(o=>`<option value="${esc(o.id)}" ${f.obra===o.id?'selected':''}>${esc(o.id)}</option>`).join('')}</select><select id="fde" data-act="fdes" data-k="estado"><option value="">Todos los estados</option>${ESTADOS.map(e=>`<option ${f.estado===e?'selected':''}>${e}</option>`).join('')}</select><select id="fdt" data-act="fdes" data-k="tipo"><option value="">Todos los tipos</option>${TIPOS.map(e=>`<option ${f.tipo===e?'selected':''}>${esc(e)}</option>`).join('')}</select></div>`;
+  h+=`<div class="panel scroll"><table style="min-width:1100px"><thead><tr><th>Fecha</th><th>Obra</th><th>Evento</th><th>Tipo</th><th class="num">Días</th><th>Plan de acción</th><th>Fecha P.A.</th><th>Resp.</th><th title="¿El desvío genera retrabajo?">Genera retrabajo</th><th title="¿Era evitable la paralización?">Paralización evitable</th><th>Estado</th><th></th></tr></thead><tbody>`;
+  h+=list.length?list.map(d=>`<tr><td class="tag">${fd(d.fecha)}</td><td class="name">${esc(d.obra)}</td><td style="min-width:200px">${esc(d.evento)}${d.prio&&d.prio!=='normal'?` ${pill(d.prio==='alta'?'warn':'bad',d.prio)}`:''}</td><td>${esc(d.tipo)}</td><td class="num">${d.impDias==null?'<span class="dim">estudio</span>':'+'+d.impDias}</td><td style="min-width:220px" class="dim">${esc(d.plan)}</td><td>${fd(d.fechaPA)}${vencido(d)?' '+pill('bad','venc.'):''}</td><td>${esc(d.resp)}</td><td>${tg(d,'retrab','Retrabajo')}</td><td>${tg(d,'paral','Paralización evitable')}</td><td><select data-act="destado" data-id="${d.id}" aria-label="Estado">${ESTADOS.map(e=>`<option ${d.estado===e?'selected':''}>${e}</option>`).join('')}</select></td><td><button class="btn ghost sm" data-act="editdes" data-id="${d.id}">Editar</button></td></tr>`).join(''):`<tr><td colspan="12" class="dim">No hay desvíos con estos filtros.</td></tr>`;
+  return h+`</tbody></table></div>`+indicadoresHTML()}
+const tg=(d,f,n)=>`<button type="button" class="tg ${d[f]||''}" data-act="dflag" data-id="${esc(d.id)}" data-f="${f}" aria-label="${n}: ${d[f]==='si'?'sí':d[f]==='no'?'no':'sin definir'}" title="${n}. Tocá para cambiar: sin definir, Sí, No">${d[f]==='si'?'Sí':d[f]==='no'?'No':'–'}</button>`;
+const INDLAB={desvios:'Desvíos anticipados por DT (totales vs DT)',pendientes:'Pendientes cerrados',retrabajos:'Retrabajos (con responsable)',paralizaciones:'Paralizaciones evitables'};
+function indDyn(o,k,per){const v=indVal(S,o,per,k),q=indVal(S,o,prevPer(per),k);const vd=verdict(k,v.dt,q.dt);
+  const txt=vd==='good'?'Conforme':vd==='bad'?'No conforme':v.dt==null?'Sin datos':q.dt==null?'Sin mes anterior':'Sin variación';
+  return `<div class="row" style="gap:8px"><span class="tag">Result. ${pc(v.res)}</span><span class="tag">Ant. ${q.dt==null?'–':q.dt}</span>${pill(vd,txt)}</div>`}
+function indicadoresHTML(){const per=ui.per;
+  let h=`<section class="blk" style="margin-top:30px"><h2>Indicadores de gestión · ${esc(per)}</h2><p class="sub">Escribí cuántos le corresponden a la DT y cuántos hay en total. La conformidad compara la DT contra el mes anterior: desvíos anticipados y pendientes cerrados deben subir; retrabajos y paralizaciones deben bajar. Desvíos anticipados: si dejás vacío DT, se toma del registro (los marcados «Detectó: DT»). Retrabajos y paralizaciones evitables: en cuanto marcás algún desvío del mes con los botones del registro, se calculan solos y el campo queda bloqueado.</p><div class="panel scroll"><table class="ig" style="min-width:860px"><thead><tr><th>Obra</th><th>Indicador</th><th class="num">DT</th><th class="num">Totales</th><th>Evaluación</th><th>Responsable / observación</th></tr></thead><tbody>`;
+  activas().forEach(o=>{IND.forEach(([k],idx)=>{const e=(((S.inf[o.id+'|'+per]||{}).ind)||{})[k]||{};const v=indVal(S,o.id,per,k);const f=k==='retrabajos'?'resp':'obs';const lock=(k==='retrabajos'||k==='paralizaciones')&&v.auto;
+    h+=`<tr class="${idx===0?'og':''}"><td class="name">${idx===0?esc(o.id):''}</td><td>${esc(INDLAB[k])}<div class="tag">${OBJ[k]==='asc'?'Objetivo ascendente ▲':'Objetivo descendente ▼'}</div></td>
+    <td class="num"><input type="number" min="0" id="idt_${esc(o.id)}_${k}" data-act="indn" data-o="${esc(o.id)}" data-k="${k}" data-f="dt" value="${lock?v.dt:(typeof e.dt==='number'?e.dt:'')}" placeholder="${v.auto&&v.dt!=null?v.dt:''}" ${lock?'disabled title="Calculado desde los botones del registro de desvíos"':''}></td>
+    <td class="num"><input type="number" min="0" id="itt_${esc(o.id)}_${k}" data-act="indn" data-o="${esc(o.id)}" data-k="${k}" data-f="total" value="${typeof e.total==='number'?e.total:''}" placeholder="${v.auto&&v.total!=null?v.total:''}"></td>
+    <td id="idyn_${esc(o.id)}_${k}">${indDyn(o.id,k,per)}</td>
+    <td><input type="text" id="ixt_${esc(o.id)}_${k}" data-act="indt" data-o="${esc(o.id)}" data-k="${k}" data-f="${f}" value="${esc(e[f]||'')}" placeholder="${k==='retrabajos'?(v.resp&&!e.resp?v.resp:'Responsable del retrabajo'):'Observación'}"></td></tr>`})});
+  return h+`</tbody></table></div></section>`}
+const opt=(arr,v)=>arr.map(a=>`<option ${a===v?'selected':''}>${esc(a)}</option>`).join('');
+const flagOpt=v=>`<option value="" ${!v?'selected':''}>Sin definir</option><option value="si" ${v==='si'?'selected':''}>Sí</option><option value="no" ${v==='no'?'selected':''}>No</option>`;
+function formDesvio(){const d=ui.form.id?S.desvios.find(x=>x.id===ui.form.id):{fecha:isoToday(),obra:ui.fDes.obra||activas()[0].id,estado:'abierto',prio:'normal',tipo:TIPOS[0],detecta:'DT'};
+  return `<form class="panel" id="fdesForm" style="margin-bottom:14px"><b>${ui.form.id?'Editar desvío':'Nuevo desvío'}</b><div class="grid-f">
+  <label>Fecha<input type="date" name="fecha" value="${esc(d.fecha)}" required></label>
+  <label>Obra<select name="obra">${S.obras.map(o=>`<option value="${esc(o.id)}" ${o.id===d.obra?'selected':''}>${esc(o.nombre)}</option>`).join('')}</select></label>
+  <label>Tipo<select name="tipo">${opt(TIPOS,d.tipo)}</select></label>
+  <label>Detectó<select name="detecta">${opt(['DT','CO','Otro'],d.detecta||'')}</select></label>
+  <label>Impacto en plazo (días)<input type="number" name="impDias" min="0" value="${d.impDias==null?'':d.impDias}" placeholder="vacío = en estudio"></label>
+  <label>Prioridad<select name="prio">${opt(PRIOS,d.prio||'normal')}</select></label>
+  <label class="wide">Evento<input type="text" name="evento" value="${esc(d.evento||'')}" required></label>
+  <label class="wide">Plan de acción<textarea name="plan" rows="2">${esc(d.plan||'')}</textarea></label>
+  <label>Fecha del plan<input type="date" name="fechaPA" value="${esc(d.fechaPA||'')}"></label>
+  <label>Responsable<input type="text" name="resp" value="${esc(d.resp||'')}"></label>
+  <label>Estado<select name="estado">${opt(ESTADOS,d.estado)}</select></label>
+  <label>¿Genera retrabajo?<select name="retrab">${flagOpt(d.retrab)}</select></label>
+  <label>¿Paralización evitable?<select name="paral">${flagOpt(d.paral)}</select></label></div>
+  <div class="row"><button class="btn" type="submit">Guardar</button><button class="btn ghost" type="button" data-act="cancelform">Cancelar</button>${ui.form.id?`<button class="btn danger" type="button" data-act="${ui.form.del?'deldes2':'deldes'}">${ui.form.del?'Confirmar: eliminar':'Eliminar'}</button>`:''}</div></form>`}
+
+/* ---------- Compras ---------- */
+function viewCompras(){
+  const f=ui.fCom;let list=S.compras.filter(c=>(!f.obra||c.obra===f.obra)&&(!f.per||(c.fin||c.inicio||'').slice(0,7)===f.per)).sort((a,b)=>(b.inicio||'').localeCompare(a.inicio||''));
+  const ks=list.map(compra);const ex=avg(ks.map(k=>k.ex)),ci=avg(ks.map(k=>k.ciclo)),ah=avg(ks.map(k=>k.ah));
+  const meses=[...new Set(S.compras.map(c=>(c.fin||c.inicio||'').slice(0,7)))].sort();
+  let h=`<div class="row" style="justify-content:space-between;margin-bottom:10px"><div><h2>Compras · indicadores</h2><p class="sub" style="margin:0">Tiempo de ciclo, exactitud del pedido y ahorro. La meta de exactitud del informe de marzo es 95%.</p></div><button class="btn" data-act="newcom">+ Nuevo requerimiento</button></div>`;
+  if(ui.form&&ui.form.kind==='compra')h+=formCompra();
+  h+=`<div class="stats"><div class="stat"><div class="k">Requerimientos</div><div class="v">${list.length}</div><div class="d">${list.filter(c=>!c.fin).length} en curso</div></div><div class="stat"><div class="k">Ciclo medio</div><div class="v">${ci==null?'–':ci.toFixed(1)}</div><div class="d">días, solo los cerrados</div></div><div class="stat"><div class="k">Exactitud</div><div class="v">${pc(ex)}</div><div class="d">entregado / pedido</div></div><div class="stat"><div class="k">Ahorro medio</div><div class="v">${pc(ah)}</div><div class="d">precio inicial vs compra</div></div></div>`;
+  h+=`<div class="row" style="margin-bottom:10px"><select id="fco" data-act="fcom" data-k="obra"><option value="">Todas las obras</option>${S.obras.map(o=>`<option value="${esc(o.id)}" ${f.obra===o.id?'selected':''}>${esc(o.id)}</option>`).join('')}</select><select id="fcp" data-act="fcom" data-k="per"><option value="">Todos los meses</option>${meses.map(m=>`<option ${f.per===m?'selected':''}>${m}</option>`).join('')}</select></div>`;
+  h+=`<div class="panel scroll"><table style="min-width:900px"><thead><tr><th>Obra</th><th>Req.</th><th>Descripción</th><th>Inicio</th><th>Fin</th><th class="num">Ciclo</th><th class="num">Ped.</th><th class="num">Entr.</th><th class="num">Exactitud</th><th class="num">Ahorro</th><th></th></tr></thead><tbody>`;
+  h+=list.length?list.map(c=>{const k=compra(c);return `<tr><td class="name">${esc(c.obra)}</td><td class="tag">${esc(c.req)}</td><td style="min-width:180px">${esc(c.desc)}${c.obs?`<div class="dim">${esc(c.obs)}</div>`:''}</td><td class="tag">${fd(c.inicio)}</td><td class="tag">${c.fin?fd(c.fin):pill('acc','en curso')}</td><td class="num">${k.ciclo!=null?k.ciclo+' d':k.transc!=null?`<span class="dim">${k.transc} d…</span>`:'–'}</td><td class="num">${c.pedidos??'–'}</td><td class="num">${c.entregados??'–'}</td><td class="num">${k.ex==null?'–':`<span class="${k.ex<.95?'pill warn':'pill good'}">${pc(k.ex)}</span>`}</td><td class="num">${k.ah==null?'–':pc(k.ah)}${c.pIni&&c.pCompra?`<div class="dim">${money(c.pIni-c.pCompra)}</div>`:''}</td><td><button class="btn ghost sm" data-act="editcom" data-id="${c.id}">Editar</button></td></tr>`}).join(''):`<tr><td colspan="11" class="dim">No hay requerimientos con estos filtros.</td></tr>`;
+  return h+`</tbody></table></div>`}
+function formCompra(){const c=ui.form.id?S.compras.find(x=>x.id===ui.form.id):{obra:ui.fCom.obra||activas()[0].id,inicio:isoToday()};
+  return `<form class="panel" id="fcomForm" style="margin-bottom:14px"><b>${ui.form.id?'Editar requerimiento':'Nuevo requerimiento'}</b><div class="grid-f">
+  <label>Obra<select name="obra">${S.obras.map(o=>`<option value="${esc(o.id)}" ${o.id===c.obra?'selected':''}>${esc(o.nombre)}</option>`).join('')}</select></label>
+  <label>Requerimiento<input type="text" name="req" value="${esc(c.req||'')}" placeholder="REQ Nº 018" required></label>
+  <label class="wide">Descripción<input type="text" name="desc" value="${esc(c.desc||'')}" required></label>
+  <label>Inicio<input type="date" name="inicio" value="${esc(c.inicio||'')}" required></label>
+  <label>Fin (llegada)<input type="date" name="fin" value="${esc(c.fin||'')}"></label>
+  <label>Cant. pedidos<input type="number" name="pedidos" min="0" value="${c.pedidos??''}"></label>
+  <label>Cant. entregados<input type="number" name="entregados" min="0" value="${c.entregados??''}"></label>
+  <label>Presupuesto inicial ($)<input type="number" name="pIni" min="0" value="${c.pIni??''}"></label>
+  <label>Compra final ($)<input type="number" name="pCompra" min="0" value="${c.pCompra??''}"></label>
+  <label class="wide">Observación<textarea name="obs" rows="2">${esc(c.obs||'')}</textarea></label></div>
+  <div class="row"><button class="btn" type="submit">Guardar</button><button class="btn ghost" type="button" data-act="cancelform">Cancelar</button>${ui.form.id?`<button class="btn danger" type="button" data-act="${ui.form.del?'delcom2':'delcom'}">${ui.form.del?'Confirmar: eliminar':'Eliminar'}</button>`:''}</div></form>`}
+
+/* ---------- Obras, DT y parámetros ---------- */
+function viewConfig(){
+  let h=`<h2>Obras y DT</h2><p class="sub">Asigná los DT a cada obra y marcá cuáles están activas. Solo las activas entran al tablero.</p><div class="panel scroll"><table style="min-width:640px"><thead><tr><th>Código</th><th>Obra</th><th>DT a cargo</th><th>Activa</th></tr></thead><tbody>`;
+  S.obras.forEach(o=>{h+=`<tr><td class="tag">${esc(o.id)}</td><td><input type="text" id="on_${esc(o.id)}" data-act="onombre" data-id="${esc(o.id)}" value="${esc(o.nombre)}" style="width:100%;min-width:200px"></td><td><div class="row">${S.dts.map(d=>`<label class="row" style="gap:4px"><input type="checkbox" data-act="odt" data-id="${esc(o.id)}" data-dt="${d.id}" ${o.dts.includes(d.id)?'checked':''}>${esc(d.nombre)}</label>`).join('')}</div></td><td><input type="checkbox" data-act="oact" data-id="${esc(o.id)}" ${o.activa?'checked':''} aria-label="Activa"></td></tr>`});
+  h+=`</tbody></table></div><div class="row" style="margin-top:10px"><input type="text" id="newObraId" placeholder="Código (ej. NV)" style="width:120px"><input type="text" id="newObraN" placeholder="Nombre de la obra"><button class="btn" data-act="addobra">Agregar obra</button></div>`;
+  h+=`<div class="row" style="margin-top:14px"><input type="text" id="newDt" placeholder="Nombre del DT"><button class="btn" data-act="adddt">Agregar DT</button></div>`;
+  h+=`<section class="blk" style="margin-top:30px"><h2>Parámetros de evaluación</h2><p class="sub">Los pesos salen de tus planillas. Las metas son una propuesta mía: ajustalas a tu criterio.</p><div class="panel"><div class="grid-f">`+BLOCKS.map(([k,n])=>`<label>Peso ${esc(n)} (%)<input type="number" min="0" max="100" id="w_${esc(k)}" data-act="peso" data-k="${esc(k)}" value="${Math.round(S.cfg.w[k]*100)}"></label>`).join('')+`<label>Meta de conformidad (%)<input type="number" min="0" max="100" id="meta" data-act="meta" data-k="meta" value="${Math.round(S.cfg.meta*100)}"></label><label>Piso de alerta (%)<input type="number" min="0" max="100" id="alerta" data-act="meta" data-k="alerta" value="${Math.round(S.cfg.alerta*100)}"></label></div><p class="dim">Conforme desde la meta, en alerta desde el piso, no conforme por debajo. Los pesos no necesitan sumar 100.</p></div></section>`;
+  h+=`<section class="blk"><h2>Copia de seguridad</h2><p class="sub">Descargá todos los datos o restaurá una copia anterior.</p><div class="row"><button class="btn" data-act="export">Descargar copia (.json)</button><label class="btn ghost" style="cursor:pointer">Restaurar desde archivo<input type="file" id="impFile" accept=".json,application/json" data-act="impfile" hidden></label></div><div class="dim" id="impMsg">${esc(ui.msg)}</div></section>`;
+  return h}
+
+/* ---------- shell ---------- */
+const TABS=[['tablero','Tablero'],['carga','Carga semanal'],['desvios','Desvíos'],['compras','Compras'],['config','Obras y DT']];
+function render(){
+  document.getElementById('tabs').innerHTML=TABS.map(([k,n])=>`<button data-act="tab" data-k="${k}" ${ui.tab===k?'aria-current="true"':''}>${n}</button>`).join('');
+  document.getElementById('per').value=ui.per;
+  document.getElementById('sum').textContent=`${activas().length} obras activas · ${S.dts.length} DT`;
+  const v={tablero:viewTablero,carga:viewCarga,desvios:viewDesvios,compras:viewCompras,config:viewConfig}[ui.tab];
+  document.getElementById('app').innerHTML=v()}
+function refInf(){const o=S.obras.find(x=>x.id===ui.obra);const b=document.getElementById('informeBox');if(b&&o)b.innerHTML=informeHTML(o,ui.per)}
+const uid=()=>Math.random().toString(36).slice(2,9);
+function ensure(key){return S.checks[key]||(S.checks[key]={i:{},o:{}})}
+function ensureInf(key){const x=S.inf[key]||(S.inf[key]={txt:{},ind:{}});x.txt=x.txt||{};x.ind=x.ind||{};return x}
+const num=v=>v===''||v==null?null:Number(v);
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-act]');if(!t||t.tagName==='SELECT'||t.tagName==='INPUT'&&t.type!=='checkbox')return;const a=t.dataset.act;
+  if(a==='tab'){ui.tab=t.dataset.k;ui.form=null;try{history.replaceState(null,'','#'+ui.tab)}catch(x){}render();scrollTo(0,0)}
+  else if(a==='goobra'){ui.obra=t.dataset.id;ui.tab='carga';render();scrollTo(0,0)}
+  else if(a==='dtopen'){ui.open=ui.open===t.dataset.id?null:t.dataset.id;keep()}
+  else if(a==='cell'){const k=ui.obra+'|'+ui.per;const c=ensure(k);const n=t.dataset.n,w=+t.dataset.w;const row=c.i[n]||(c.i[n]=[]);while(row.length<=w)row.push(null);const v=row[w];row[w]=v==null?1:v===1?0:null;persist();keep()}
+  else if(a==='colok'){const k=ui.obra+'|'+ui.per;const c=ensure(k);const w=+t.dataset.w;ITEMS.forEach(it=>{if(!appl(it,w))return;const row=c.i[it.n]||(c.i[it.n]=[]);while(row.length<=w)row.push(null);if(row[w]==null)row[w]=1});persist();keep()}
+  else if(a==='dflag'){const d=S.desvios.find(x=>x.id===t.dataset.id);if(d){const f=t.dataset.f,c=d[f]||'';d[f]=c===''?'si':c==='si'?'no':'';persist();keep()}}
+  else if(a==='newdes'){ui.form={kind:'desvio',id:null};render()}
+  else if(a==='editdes'){ui.form={kind:'desvio',id:t.dataset.id};render();scrollTo(0,0)}
+  else if(a==='newcom'){ui.form={kind:'compra',id:null};render()}
+  else if(a==='editcom'){ui.form={kind:'compra',id:t.dataset.id};render();scrollTo(0,0)}
+  else if(a==='cancelform'){ui.form=null;render()}
+  else if(a==='deldes'||a==='delcom'){ui.form.del=true;render()}
+  else if(a==='deldes2'){S.desvios=S.desvios.filter(d=>d.id!==ui.form.id);ui.form=null;persist();render()}
+  else if(a==='delcom2'){S.compras=S.compras.filter(d=>d.id!==ui.form.id);ui.form=null;persist();render()}
+  else if(a==='addobra'){const id=document.getElementById('newObraId').value.trim(),n=document.getElementById('newObraN').value.trim();if(id&&n&&!S.obras.some(o=>o.id===id)){S.obras.push({id,nombre:n,dts:[],activa:true});persist();render()}}
+  else if(a==='adddt'){const n=document.getElementById('newDt').value.trim();if(n){S.dts.push({id:'dt'+uid(),nombre:n});persist();render()}}
+  else if(a==='odt'){const o=S.obras.find(x=>x.id===t.dataset.id);const id=t.dataset.dt;o.dts=t.checked?[...new Set([...o.dts,id])]:o.dts.filter(x=>x!==id);persist()}
+  else if(a==='oact'){S.obras.find(x=>x.id===t.dataset.id).activa=t.checked;persist();document.getElementById('sum').textContent=`${activas().length} obras activas · ${S.dts.length} DT`}
+  else if(a==='export'){const json=JSON.stringify(S,null,1);let ok=false;try{if(dl)await dl.save({filename:'coordinacion-obras-'+isoToday()+'.json',data:json});ok=!!dl}catch(x){}
+    if(!ok){try{await navigator.clipboard.writeText(json);ui.msg='No se pudo descargar; el contenido quedó copiado al portapapeles.'}catch(x){ui.msg='No se pudo descargar ni copiar.'}document.getElementById('impMsg').textContent=ui.msg}}
+});
+document.addEventListener('change',e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act,k=ui.obra+'|'+ui.per;
+  if(a==='per'){if(t.value){ui.per=t.value;render()}}
+  else if(a==='obra'){ui.obra=t.value;render()}
+  else if(a==='obs'){const c=ensure(k);c.o=c.o||{};if(t.value.trim())c.o[t.dataset.n]=t.value.trim();else delete c.o[t.dataset.n];persist();refInf()}
+  else if(a==='odest'){const c=ensure(k);c.d=c.d||{};c.d[t.dataset.n]=t.value;persist();refInf()}
+  else if(a==='obsdt'){const o=S.obsDT[ui.per]||(S.obsDT[ui.per]={});if(t.value.trim())o[t.dataset.id]=t.value;else delete o[t.dataset.id];persist()}
+  else if(a==='indn'||a==='indt'){const o=t.dataset.o,kk=t.dataset.k;const x=ensureInf(o+'|'+ui.per);const e=(x.ind[kk]=x.ind[kk]||{});if(a==='indn')e[t.dataset.f]=num(t.value);else e[t.dataset.f]=t.value.trim();persist();const c=document.getElementById('idyn_'+o+'_'+kk);if(c)c.innerHTML=indDyn(o,kk,ui.per)}
+  else if(a==='ind'){ensureInf(k).ind[t.dataset.k]=num(t.value);persist()}
+  else if(a==='txt'){const x=ensureInf(k);(x.txt[t.dataset.b]=x.txt[t.dataset.b]||{})[t.dataset.f]=t.value;persist()}
+  else if(a==='fdes'){ui.fDes[t.dataset.k]=t.value;render()}
+  else if(a==='fcom'){ui.fCom[t.dataset.k]=t.value;render()}
+  else if(a==='destado'){const d=S.desvios.find(x=>x.id===t.dataset.id);d.estado=t.value;persist();keep()}
+  else if(a==='onombre'){S.obras.find(x=>x.id===t.dataset.id).nombre=t.value;persist()}
+  else if(a==='peso'){S.cfg.w[t.dataset.k]=Math.max(0,Number(t.value)||0)/100;persist()}
+  else if(a==='meta'){S.cfg[t.dataset.k]=Math.min(100,Math.max(0,Number(t.value)||0))/100;persist()}
+  else if(a==='impfile'){const f=t.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(!j||!Array.isArray(j.obras)||!j.checks)throw 0;S=Object.assign(defaultState(),j);persist();ui.msg='Copia restaurada.';render()}catch(x){document.getElementById('impMsg').textContent='El archivo no es una copia válida.'}};r.readAsText(f)}
+});
+document.addEventListener('submit',e=>{e.preventDefault();const f=e.target,fd_=Object.fromEntries(new FormData(f));
+  if(f.id==='fdesForm'){const d={id:ui.form.id||uid(),fecha:fd_.fecha,obra:fd_.obra,evento:fd_.evento.trim(),tipo:fd_.tipo,detecta:fd_.detecta,impDias:num(fd_.impDias),plan:fd_.plan.trim(),fechaPA:fd_.fechaPA||null,resp:fd_.resp.trim(),estado:fd_.estado,prio:fd_.prio,retrab:fd_.retrab||'',paral:fd_.paral||''};
+    const i=S.desvios.findIndex(x=>x.id===d.id);if(i>=0)S.desvios[i]=Object.assign(S.desvios[i],d);else S.desvios.push(d);}
+  else if(f.id==='fcomForm'){const c={id:ui.form.id||uid(),obra:fd_.obra,req:fd_.req.trim(),desc:fd_.desc.trim(),inicio:fd_.inicio,fin:fd_.fin||null,pedidos:num(fd_.pedidos),entregados:num(fd_.entregados),pIni:num(fd_.pIni),pCompra:num(fd_.pCompra),obs:fd_.obs.trim()};
+    const i=S.compras.findIndex(x=>x.id===c.id);if(i>=0)S.compras[i]=c;else S.compras.push(c);}
+  else return;ui.form=null;persist();render()});
+
+async function boot(){
+  setStatus('load');
+  try{const c=window.claude;if(c&&c.use){db=await c.use('db');dl=await c.use('downloads')}}catch(e){db=null}
+  let loaded=null;
+  if(db){try{const s=await db.doc('app/state').get();dbReady=true;if(s.exists&&s.data().json){loaded=JSON.parse(s.data().json);lastAt=s.data().at||0}}catch(e){}}
+  if(!loaded){try{const l=localStorage.getItem('co_state');if(l)loaded=JSON.parse(l)}catch(e){}}
+  S=migrate(loaded||{});
+  const ms=monthsWithData();const now=isoToday().slice(0,7);const cnt={};Object.keys(S.checks).forEach(k=>{const m=k.split('|')[1];cnt[m]=(cnt[m]||0)+1});const good=ms.filter(m=>cnt[m]>=Math.ceil(activas().length/2));ui.per=good.length?good[good.length-1]:(ms.length?ms[ms.length-1]:now);
+  const h=(location.hash||'').slice(1);if(TABS.some(t=>t[0]===h))ui.tab=h;
+  ui.obra=(activas()[0]||{}).id||'';
+  render();setStatus(db?(dbReady?'ok':'err'):'local');
+  if(db&&dbReady){try{db.doc('app/state').onSnapshot(snap=>{if(!snap.exists)return;const d=snap.data();if(!d||!d.json||d.at===lastAt||saveT)return;try{S=migrate(JSON.parse(d.json));lastAt=d.at;keep()}catch(e){}})}catch(e){}}}
+boot();
+</script>
+
+</body></html>
