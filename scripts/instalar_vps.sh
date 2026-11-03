@@ -30,10 +30,22 @@ apt-get update -q
 apt-get install -y -q git ufw curl debian-keyring debian-archive-keyring apt-transport-https gnupg
 
 echo "== 2/5 Firewall: SSH, web (80) y web segura (443)"
-ufw allow OpenSSH >/dev/null
-ufw allow 80/tcp >/dev/null
-ufw allow 443/tcp >/dev/null
-ufw --force enable >/dev/null
+# El puerto de SSH puede no ser el 22 (en Hostinger suele ser 22022): se abre el que use este servidor,
+# así el firewall nunca corta el acceso. Si no se puede saber, el firewall no se activa.
+PUERTOS_SSH="$( { sshd -T 2>/dev/null | awk '$1=="port"{print $2}'; ss -tlnpH 2>/dev/null | awk '/sshd/{n=split($4,a,":"); print a[n]}'; } | sort -un | tr '\n' ' ')"
+if [ -n "${PUERTOS_SSH// /}" ]; then
+  for p in $PUERTOS_SSH; do ufw allow "$p/tcp" >/dev/null; done
+  ufw allow 80/tcp >/dev/null
+  ufw allow 443/tcp >/dev/null
+  ufw --force enable >/dev/null
+  echo "   Abiertos: SSH ($PUERTOS_SSH), 80 y 443"
+else
+  echo "   No pude detectar el puerto de SSH: dejo el firewall del servidor como está."
+  if ufw status 2>/dev/null | grep -q "Status: active"; then
+    ufw allow 80/tcp >/dev/null
+    ufw allow 443/tcp >/dev/null
+  fi
+fi
 
 echo "== 3/5 Instalando Caddy (servidor web con HTTPS automático)"
 if ! command -v caddy >/dev/null; then

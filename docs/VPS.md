@@ -11,8 +11,8 @@ Guía para el VPS de Hostinger (**SSA VPS**, IP `143.95.174.234`) o cualquier VP
 - **Desde Hostinger, sin instalar nada:** en hPanel → VPS → **SSA VPS**, tocá el botón de
   **Acceso rápido** (el ícono de la terminal) o **Administrar → Terminal del navegador**. Se abre una
   terminal ya conectada como `root`.
-- **Desde la PC:** `ssh root@143.95.174.234` (la contraseña de root está en hPanel → VPS → Administrar →
-  Acceso SSH).
+- **Desde la PC:** `ssh -p 22022 root@143.95.174.234` (Hostinger usa el puerto **22022**; la contraseña
+  de root se cambia en hPanel → VPS → Acceso SSH → Cambiar contraseña root).
 
 Opcional: un subdominio apuntando a la IP, por ejemplo `obras.saezsanchez.com.ar` (registro **A** en
 el DNS del dominio con el valor `143.95.174.234`). Con subdominio, la página sale con HTTPS
@@ -20,14 +20,14 @@ automático. Sin subdominio funciona igual por `http://143.95.174.234`.
 
 ## Instalar el panel con un solo comando
 
-Pegá esto en la terminal del VPS y apretá Enter:
+En hPanel → VPS → **Abrir consola**, pegá esto (clic derecho → Pegar, o Ctrl+Shift+V) y apretá Enter:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/arquitectura-ssa-git/coordinacion-de-obras/main/scripts/instalar_vps.sh | sudo bash
 ```
 
 El script ([`scripts/instalar_vps.sh`](../scripts/instalar_vps.sh)) actualiza el servidor, abre los
-puertos 22, 80 y 443, instala Caddy (servidor web con HTTPS automático), baja este repositorio en
+puertos de SSH (el que use el servidor, en Hostinger el 22022), 80 y 443, instala Caddy (servidor web con HTTPS automático), baja este repositorio en
 `/opt/coordinacion-de-obras` y al final pregunta:
 
 1. **Subdominio**: escribilo, o dejalo vacío para entrar por la IP.
@@ -60,7 +60,7 @@ el comando de instalación.
 ```bash
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y git ufw curl debian-keyring debian-archive-keyring apt-transport-https
-sudo ufw allow OpenSSH && sudo ufw allow 80 && sudo ufw allow 443 && sudo ufw --force enable
+sudo ufw allow 22022/tcp && sudo ufw allow 80 && sudo ufw allow 443 && sudo ufw --force enable
 curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
 curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
 sudo apt update && sudo apt install -y caddy
