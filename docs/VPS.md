@@ -36,6 +36,20 @@ puertos de SSH (el que use el servidor, en Hostinger el 22022), 80 y 443, instal
 Al terminar muestra la dirección. Abrila, entrá con el usuario y la contraseña, y aparece el tablero.
 El mapa del sistema queda en la misma dirección con `/mapa.html` al final.
 
+### Si el VPS ya tiene nginx con otros sitios
+
+El instalador lo detecta solo y agrega el panel como un sitio más de nginx, sin tocar los otros (en
+el VPS de Sáez Sánchez, nginx ya publica otros subdominios). También se puede correr directo:
+
+```bash
+cd /opt/coordinacion-de-obras && git pull && bash scripts/publicar_nginx.sh
+```
+
+[`scripts/publicar_nginx.sh`](../scripts/publicar_nginx.sh) agrega el archivo del sitio en
+`/etc/nginx/sites-available/`, la contraseña en `/etc/nginx/coordinacion-obras.htpasswd`, prueba la
+configuración con `nginx -t` (si falla, la saca y deja todo como estaba) y saca el certificado HTTPS
+con certbot.
+
 ### Actualizar el panel
 
 Cada vez que haya cambios en el repositorio:

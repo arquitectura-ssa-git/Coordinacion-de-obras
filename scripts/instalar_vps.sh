@@ -47,6 +47,14 @@ else
   fi
 fi
 
+# Si ya hay un nginx atendiendo la web (otros sitios en el mismo VPS), el panel se agrega a ese nginx
+# como un sitio más y no se instala Caddy: así no se tocan los sitios que ya funcionan.
+if systemctl is-active --quiet nginx; then
+  echo "== nginx ya atiende la web en este servidor: el panel se agrega como un sitio más"
+  if [ -d "$DESTINO/.git" ]; then git -C "$DESTINO" pull --ff-only; else git clone "$REPO" "$DESTINO"; fi
+  exec bash "$DESTINO/scripts/publicar_nginx.sh"
+fi
+
 echo "== 3/5 Instalando Caddy (servidor web con HTTPS automático)"
 if ! command -v caddy >/dev/null; then
   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor --yes -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
@@ -75,6 +83,10 @@ done
 HASH="$(caddy hash-password --plaintext "$CLAVE")"
 SITIO="${DOMINIO:-:80}"
 
+if [ -f /etc/caddy/Caddyfile ] && ! grep -q "Generado por scripts/instalar_vps.sh" /etc/caddy/Caddyfile && ! grep -q "/usr/share/caddy" /etc/caddy/Caddyfile; then
+  cp /etc/caddy/Caddyfile "/etc/caddy/Caddyfile.antes-del-panel-$(date +%Y%m%d-%H%M%S)"
+  echo "   Había una configuración propia de Caddy: quedó una copia en /etc/caddy/"
+fi
 cat > /etc/caddy/Caddyfile <<EOF
 # Panel de seguimiento de obras. Generado por scripts/instalar_vps.sh
 $SITIO {
