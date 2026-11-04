@@ -36,7 +36,10 @@ while true; do
   if [ -n "$CLAVE" ] && [ "$CLAVE" = "$CLAVE2" ]; then break; fi
   echo "No coinciden o está vacía. Probá de nuevo."
 done
-printf '%s:%s\n' "$USUARIO" "$(printf '%s' "$CLAVE" | openssl passwd -apr1 -stdin)" > "$CLAVES"
+# Agrega el usuario (o le cambia la contraseña) sin borrar a los demás. Para más usuarios: scripts/usuarios.sh
+touch "$CLAVES"
+awk -F: -v u="$USUARIO" '$1 != u' "$CLAVES" > "$CLAVES.tmp" && cat "$CLAVES.tmp" > "$CLAVES" && rm -f "$CLAVES.tmp"
+printf '%s:%s\n' "$USUARIO" "$(printf '%s' "$CLAVE" | openssl passwd -apr1 -stdin)" >> "$CLAVES"
 chown root:www-data "$CLAVES"
 chmod 640 "$CLAVES"
 
@@ -99,4 +102,5 @@ else
 fi
 echo "  Usuario: $USUARIO"
 echo "  Mapa del sistema: https://$DOMINIO/mapa.html"
+echo "Para agregar otra persona: bash $DESTINO/scripts/usuarios.sh agregar NOMBRE"
 echo "Para actualizar el panel: cd $DESTINO && git pull"

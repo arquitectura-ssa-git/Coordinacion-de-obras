@@ -50,6 +50,18 @@ cd /opt/coordinacion-de-obras && git pull && bash scripts/publicar_nginx.sh
 configuración con `nginx -t` (si falla, la saca y deja todo como estaba) y saca el certificado HTTPS
 con certbot.
 
+### Usuarios que pueden entrar
+
+Cada persona entra con su propio usuario y contraseña. Desde la terminal del VPS:
+
+```bash
+bash /opt/coordinacion-de-obras/scripts/usuarios.sh listar
+bash /opt/coordinacion-de-obras/scripts/usuarios.sh agregar NOMBRE    # si ya existe, cambia la contraseña
+bash /opt/coordinacion-de-obras/scripts/usuarios.sh borrar NOMBRE
+```
+
+Los cambios valen al instante. Todos ven lo mismo: el panel todavía no tiene permisos por rol.
+
 ### Actualizar el panel
 
 Cada vez que haya cambios en el repositorio:
